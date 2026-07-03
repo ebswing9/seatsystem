@@ -1,3 +1,4 @@
+console.log("ADMIN JS LOADED");
 /* =========================
    상태
 ========================= */
@@ -271,3 +272,4 @@ function listenSeats() {
     });
 
 }
+console.log("ADMIN JS END");
