@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-
 /* =========================
    상태
 ========================= */
