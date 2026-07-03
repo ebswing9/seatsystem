@@ -98,7 +98,7 @@ function initListeners() {
                     div.innerText = seat.owner; // 내 자리엔 내 번호 표시
                     div.classList.add("my-seat");
                 } else {
-                    div.innerText = "●"; // 다른 사람 자리는 점으로 표시
+                    div.innerText = "마감"; // 다른 사람 자리는 점으로 표시
                     div.classList.add("other-taken");
                 }
             } else {
@@ -109,14 +109,19 @@ function initListeners() {
         }
     });
 
-    // 3. 내 데이터 감시
+ // 3. 내 데이터 감시 (더 안전한 버전)
     db.ref(`${PATH.STUDENTS}/${myId}`).on("value", (snap) => {
         myData = snap.val();
+        
+        // 내 자리가 생겼고, 현재 내가 자리를 고르는 화면(main-view)에 있다면
         if (myData?.seat) {
-            document.getElementById("final-seat").innerText = `내 자리: ${myData.seat}`;
+            const mainView = document.getElementById("main-view");
+            // main-view가 화면에 보이고 있는 상태라면 결과창으로 이동
+            if (!mainView.classList.contains("hidden")) {
+                showResult(false);
+            }
         }
     });
-}
 /* =========================
    결과 화면
 ========================= */
