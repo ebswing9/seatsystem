@@ -1,3 +1,4 @@
+document.addEventListener("DOMContentLoaded", () => {
 /* =========================
    상태 변수
 ========================= */
@@ -347,4 +348,5 @@ function showMessage(msg) {
         el.innerText = "";
     }, 2000);
 
+}
 }
