@@ -49,7 +49,24 @@
 
     <h2>🪑 좌석 선택</h2>
 
-    <div id="seat-container" class="seat-grid"></div>
+   <!-- index.html의 기존 좌석 컨테이너 부분을 아래 코드로 교체하세요 -->
+<div id="classroom-layout" class="classroom-container">
+    <div class="blackboard">칠 판 (Screen)</div>
+    
+    <div class="main-area">
+        <div class="side-area window-side">
+            <span>창</span><span>문</span>
+        </div>
+
+        <div id="seat-container" class="seat-grid">
+            <!-- JS가 이곳에 좌석을 렌더링합니다 -->
+        </div>
+
+        <div class="side-area door-side">
+            <span>복</span><span>도</span>
+        </div>
+    </div>
+</div>
 
   </div>
 </div>
