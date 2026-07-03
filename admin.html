@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>관리자 - 자리배치</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+
+<body>
+
+<!-- =========================
+  1. 관리자 로그인
+========================= -->
+<div id="admin-login-view" class="view">
+  <div class="card">
+    <h2>👨‍🏫 관리자 로그인</h2>
+
+    <input id="admin-pw" type="password" placeholder="관리자 비밀번호"/>
+
+    <button id="btn-admin-login">로그인</button>
+
+    <p id="admin-login-error" class="error-text"></p>
+  </div>
+</div>
+
+<!-- =========================
+  2. 관리자 패널
+========================= -->
+<div id="admin-view" class="view hidden">
+  <div class="card wide">
+
+    <h2>📊 관리자 패널</h2>
+
+    <!-- 인증 단어 -->
+    <div class="panel">
+      <h3>🔐 인증 단어</h3>
+      <input id="captcha-admin" type="text" placeholder="예: 자리확정"/>
+      <button id="btn-set-captcha">적용</button>
+      <p id="captcha-status"></p>
+    </div>
+
+    <!-- 게임 제어 -->
+    <div class="panel">
+      <h3>🎮 게임 제어</h3>
+
+      <button id="btn-start">▶ 시작</button>
+      <button id="btn-end">⏹ 종료</button>
+      <button id="btn-reset">🔄 초기화</button>
+    </div>
+
+    <!-- 접속 현황 -->
+    <div class="panel">
+      <h3>👥 접속 현황</h3>
+      <p id="connect-count">0 / 29</p>
+      <div id="student-list"></div>
+    </div>
+
+    <!-- 좌석 현황 -->
+    <div class="panel">
+      <h3>🪑 좌석 현황</h3>
+      <div id="admin-seat-grid" class="seat-grid"></div>
+    </div>
+
+  </div>
+</div>
+
+<script src="firebase.js"></script>
+<script src="admin.js"></script>
+
+</body>
+</html>
