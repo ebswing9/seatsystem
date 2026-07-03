@@ -21,7 +21,6 @@
   <div class="card">
     <h2>🎟 자리배치 티켓팅</h2>
 
-    <!-- 학생 번호와 비밀번호 입력 -->
     <input id="student-id" type="number" placeholder="번호 (1~29)" min="1" max="29"/>
     <input id="student-pw" type="password" placeholder="비밀번호"/>
 
@@ -43,27 +42,14 @@
 </div>
 
 <!-- =========================
-  3. 티켓팅 화면 (구조 보강)
+  3. 티켓팅 화면
 ========================= -->
 <div id="main-view" class="view hidden">
   <div class="card wide">
 
     <h2>🪑 좌석 선택</h2>
-    
-    <!-- 칠판 영역 추가 (학생들이 앞뒤를 구분할 수 있게 지표가 됩니다) -->
-    <div class="blackboard">🖥️ 칠 판 (FRONT)</div>
 
-    <!-- 교실 전체 레이아웃 (창문, 좌석, 복도를 감싸는 틀) -->
-    <div class="classroom-layout">
-      <!-- 왼쪽 창문 표시 -->
-      <div class="window-side">🪟 창문</div>
-      
-      <!-- 실제 좌석들이 배치될 공간 (여기에 R1C1 대신 예쁜 번호 좌석이 들어갑니다) -->
-      <div id="seat-container" class="seat-grid"></div>
-      
-      <!-- 오른쪽 복도 표시 -->
-      <div class="corridor-side">🚪 복도</div>
-    </div>
+    <div id="seat-container" class="seat-grid"></div>
 
   </div>
 </div>
@@ -77,7 +63,6 @@
 
     <p>인증 단어를 입력하세요</p>
 
-    <!-- 관리자가 설정한 인증단어가 여기에 실시간으로 뜹니다 -->
     <p class="captcha-box" id="captcha-text">---</p>
 
     <input id="captcha-input" type="text" placeholder="단어 입력"/>
@@ -95,12 +80,10 @@
     <h2>✅ 선택 완료</h2>
     <p>최종 결과를 기다리세요.</p>
 
-    <!-- 내가 선택한 자리가 여기에 박제되어 보입니다 -->
     <div id="final-seat"></div>
   </div>
 </div>
 
-<!-- 기존 파일 그대로 유지하는 스크립트 연결 순서 -->
 <script src="firebase.js"></script>
 <script src="student.js"></script>
 

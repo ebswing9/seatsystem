@@ -1,202 +1,378 @@
-window.addEventListener('DOMContentLoaded', () => {
-/* ==========================================
-   학생 메인 로직 (오리지널 복원 버전)
-========================================== */
 
-let currentStudentId = null;
-let currentStudentPw = null;
-let gameState = "WAIT"; 
-let currentCaptcha = "자리확정";
-let targetSeatId = null;
+/* =========================
+   전역 상태
+========================= */
+
+let myId = null;
+let myData = null;
+let currentGame = null;
+let selectedSeat = null;
+
+
+/* =========================
+   화면 전환
+========================= */
+
+function showView(id) {
+  document.querySelectorAll(".view").forEach(v => {
+    v.classList.add("hidden");
+  });
+  document.getElementById(id).classList.remove("hidden");
+}
+
+
+/* =========================
+   로그인 처리
+========================= */
 
 document.getElementById("btn-login").addEventListener("click", async () => {
-  const idInput = document.getElementById("student-id").value.trim();
-  const pwInput = document.getElementById("student-pw").value.trim();
+  const id = document.getElementById("student-id").value;
+  const pw = document.getElementById("student-pw").value;
+
   const error = document.getElementById("login-error");
   error.innerText = "";
 
-  if (!idInput || !pwInput) {
-    error.innerText = "번호와 비밀번호를 모두 입력하세요.";
+  if (!id || !pw) {
+    error.innerText = "번호와 비밀번호를 입력하세요.";
     return;
   }
 
-  try {
-    const snap = await db.ref(`${PATH.STUDENTS}/${idInput}`).once("value");
-    const student = snap.val();
+  const snap = await db.ref(`${PATH.STUDENTS}/${id}`).once("value");
+  const data = snap.val();
 
-    if (!student) {
-      error.innerText = "등록되지 않은 번호입니다.";
-      return;
-    }
-
-    if (String(pwInput) !== String(student.password)) {
-      error.innerText = "비밀번호가 틀렸습니다.";
-      return;
-    }
-
-    currentStudentId = idInput;
-    currentStudentPw = pwInput;
-
-    document.getElementById("login-view").classList.add("hidden");
-    document.getElementById("main-view").classList.remove("hidden");
-    document.getElementById("display-student-info").innerText = `${currentStudentId}번 학생 패널`;
-
-    await db.ref(`${PATH.STUDENTS}/${currentStudentId}`).update({ status: STUDENT_STATE.ONLINE });
-    
-    window.addEventListener("beforeunload", () => {
-      db.ref(`${PATH.STUDENTS}/${currentStudentId}`).once("value", (s) => {
-        const data = s.val();
-        if (data && data.status !== STUDENT_STATE.DONE) {
-          db.ref(`${PATH.STUDENTS}/${currentStudentId}`).update({ status: STUDENT_STATE.OFFLINE });
-        }
-      });
-    });
-
-    initStudentWorkspace();
-
-  } catch (err) {
-    error.innerText = "로그인 오류: " + err.message;
+  if (!data) {
+    error.innerText = "존재하지 않는 번호입니다.";
+    return;
   }
+
+  if (data.password !== pw) {
+    error.innerText = "비밀번호가 틀렸습니다.";
+    return;
+  }
+
+  myId = id;
+  myData = data;
+
+  // 로그인 기록 업데이트
+  db.ref(`${PATH.STUDENTS}/${id}`).update({
+    status: STUDENT_STATE.ONLINE
+  });
+
+  listenGameState();
+  listenMyData();
+
 });
 
-function initStudentWorkspace() {
-  listenGameStatus();
-  listenSeatsData();
-}
 
-function listenGameStatus() {
+/* =========================
+   게임 상태 감시
+========================= */
+
+function listenGameState() {
   db.ref(`${PATH.GAME}`).on("value", (snap) => {
-    const game = snap.val() || {};
-    gameState = game.state || GAME_STATE.WAIT;
-    currentCaptcha = game.captcha || DEFAULT_CAPTCHA;
+    currentGame = snap.val();
 
-    const statusBadge = document.getElementById("ticket-status");
-    if (!statusBadge) return;
+    if (!currentGame) return;
 
-    if (gameState === GAME_STATE.WAIT) {
-      statusBadge.innerText = "티켓팅 대기 중 (관리자가 시작하기를 기다려주세요)";
-      statusBadge.style.color = "#868e96";
-    } else if (gameState === GAME_STATE.OPEN) {
-      statusBadge.innerText = "티켓팅 진행 중! 원하는 자리를 선택하세요.";
-      statusBadge.style.color = "#2d6cdf";
-    } else if (gameState === GAME_STATE.END) {
-      statusBadge.innerText = "티켓팅이 종료되었습니다.";
-      statusBadge.style.color = "#d9534f";
+    // WAIT
+    if (currentGame.state === GAME_STATE.WAIT) {
+      showView("wait-view");
+      document.getElementById("wait-id").innerText = myId;
+    }
+
+    // OPEN
+    if (currentGame.state === GAME_STATE.OPEN) {
+      if (myData?.seat) {
+        showResult();
+      } else {
+        showView("main-view");
+        renderSeats();
+      }
+    }
+
+    // END
+    if (currentGame.state === GAME_STATE.END) {
+      showResult(true);
     }
   });
 }
 
-function listenSeatsData() {
-  db.ref(`${PATH.SEATS}`).on("value", (snap) => {
-    const seats = snap.val() || {};
-    const container = document.getElementById("seat-grid");
-    if (!container) return;
-    container.innerHTML = "";
 
-    for (const id in seats) {
-      const seat = seats[id];
+/* =========================
+   내 데이터 감시
+========================= */
+
+function listenMyData() {
+  db.ref(`${PATH.STUDENTS}/${myId}`).on("value", (snap) => {
+    myData = snap.val();
+
+    if (!myData) return;
+
+    if (myData.seat) {
+      document.getElementById("final-seat").innerText =
+        `내 자리: ${myData.seat}`;
+    }
+  });
+}
+
+
+/* =========================
+   결과 화면
+========================= */
+
+function showResult(final = false) {
+  showView("result-view");
+
+  if (final) {
+    document.querySelector("#result-view h2").innerText = "🎉 최종 결과";
+  }
+}
+
+/* =========================
+   좌석 렌더링
+========================= */
+
+function renderSeats() {
+  const container = document.getElementById("seat-container");
+  container.innerHTML = "";
+
+  db.ref(`${PATH.SEATS}`).once("value", (snap) => {
+    const seats = snap.val();
+
+    for (const seatId in seats) {
+      const seat = seats[seatId];
+
       const div = document.createElement("div");
       div.className = "seat";
 
+      // 상태 표시
       if (seat.locked) {
         div.classList.add("locked");
-        div.innerText = "🔒";
-      } else if (seat.owner) {
-        div.classList.add("taken");
-        if (String(seat.owner) === String(currentStudentId)) {
-          div.classList.remove("taken");
-          div.classList.add("my-seat");
-          div.innerText = `${id}\n(내 자리)`;
-        } else {
-          div.innerText = "선점됨";
-        }
-      } else {
-        div.innerText = id;
       }
 
-      div.addEventListener("click", () => {
-        if (gameState !== GAME_STATE.OPEN) {
-          alert("지금은 티켓팅 기간이 아닙니다.");
-          return;
-        }
-        if (seat.locked) {
-          alert("이 좌석은 잠겨있습니다.");
-          return;
-        }
-        if (seat.owner) {
-          alert("이미 선점된 좌석입니다.");
-          return;
-        }
+      if (seat.owner) {
+        div.classList.add("taken");
+        div.innerText = seat.owner;
+      } else {
+        div.innerText = seatId;
+      }
 
-        targetSeatId = id;
-        openCaptchaModal();
-      });
+      // 클릭 이벤트
+      if (!seat.owner && !seat.locked) {
+        div.addEventListener("click", () => {
+          openModal(seatId);
+        });
+      }
 
       container.appendChild(div);
     }
   });
 }
 
-const modal = document.getElementById("captcha-modal");
-const captchaWordDisplay = document.getElementById("captcha-word");
-const captchaInput = document.getElementById("captcha-input");
 
-function openCaptchaModal() {
-  if (!modal) return;
-  captchaWordDisplay.innerText = currentCaptcha;
-  captchaInput.value = "";
-  modal.classList.remove("hidden");
-  captchaInput.focus();
+/* =========================
+   좌석 클릭 → 모달 열기
+========================= */
+
+function openModal(seatId) {
+  selectedSeat = seatId;
+
+  document.getElementById("modal").classList.remove("hidden");
+  document.getElementById("captcha-input").value = "";
+
+  // 인증 단어 불러오기
+  db.ref(`${PATH.GAME}/captcha`).once("value", (snap) => {
+    document.getElementById("captcha-text").innerText =
+      snap.val() || DEFAULT_CAPTCHA;
+  });
 }
 
-function closeCaptchaModal() {
-  if (modal) modal.classList.add("hidden");
-}
 
-const btnCloseModal = document.getElementById("btn-close-modal");
-if (btnCloseModal) {
-  btnCloseModal.addEventListener("click", closeCaptchaModal);
-}
+/* =========================
+   모달 닫기
+========================= */
 
-document.getElementById("btn-confirm-captcha").addEventListener("click", async () => {
-  // firebase.js에 있는 checkCaptcha 함수 활용
-  if (!checkCaptcha(captchaInput.value, currentCaptcha)) {
-    alert("인증 단어가 올바르지 않습니다.");
-    captchaInput.focus();
+document.getElementById("btn-cancel").addEventListener("click", () => {
+  document.getElementById("modal").classList.add("hidden");
+  selectedSeat = null;
+});
+
+
+/* =========================
+   좌석 확정
+========================= */
+
+document.getElementById("btn-confirm").addEventListener("click", async () => {
+  const input = document.getElementById("captcha-input").value;
+
+  const snap = await db.ref(`${PATH.GAME}/captcha`).once("value");
+  const real = snap.val();
+
+  if (input !== real) {
+    alert("인증 단어가 틀렸습니다.");
     return;
   }
 
-  closeCaptchaModal();
+  // 좌석 확정
+  const seatRef = db.ref(`${PATH.SEATS}/${selectedSeat}`);
 
-  const seatRef = db.ref(`${PATH.SEATS}/${targetSeatId}`);
-  try {
-    const result = await seatRef.transaction((currentData) => {
-      if (currentData === null) return { locked: false, owner: currentStudentId };
-      if (currentData.owner || currentData.locked) return undefined;
-      currentData.owner = currentStudentId;
-      return currentData;
-    });
+  const seatSnap = await seatRef.once("value");
+  const seatData = seatSnap.val();
 
-    if (!result.committed) {
-      alert("이미 다른 학생이 선점했습니다.");
-      return;
+  if (seatData.owner) {
+    alert("이미 선택된 자리입니다.");
+    return;
+  }
+
+  await seatRef.update({
+    owner: myId
+  });
+
+  await db.ref(`${PATH.STUDENTS}/${myId}`).update({
+    seat: selectedSeat,
+    status: STUDENT_STATE.DONE
+  });
+
+  document.getElementById("modal").classList.add("hidden");
+
+  showResult(false);
+});
+
+/* =========================
+   자동 재접속 / 초기 상태 복구
+========================= */
+
+window.addEventListener("load", async () => {
+
+  // 이미 로그인된 상태인지 체크 (새로고침 대응)
+  // localStorage 사용
+  const savedId = localStorage.getItem("myId");
+
+  if (savedId) {
+    myId = savedId;
+
+    const snap = await db.ref(`${PATH.STUDENTS}/${myId}`).once("value");
+    myData = snap.val();
+
+    if (myData) {
+      listenGameState();
+      listenMyData();
     }
-
-    const seatsRef = db.ref(`${PATH.SEATS}`);
-    const seatsSnap = await seatsRef.once("value");
-    const allSeats = seatsSnap.val() || {};
-    
-    for (const seatKey in allSeats) {
-      if (seatKey !== targetSeatId && String(allSeats[seatKey].owner) === String(currentStudentId)) {
-        await seatsRef.child(seatKey).update({ owner: null });
-      }
-    }
-
-    await db.ref(`${PATH.STUDENTS}/${currentStudentId}`).update({ seat: targetSeatId, status: STUDENT_STATE.DONE });
-    alert(`${targetSeatId} 자리가 확정되었습니다!`);
-
-  } catch (error) {
-    alert("예약 오류: " + error.message);
   }
 });
+
+
+/* =========================
+   로그인 후 저장
+========================= */
+
+document.getElementById("btn-login").addEventListener("click", async () => {
+
+  const id = document.getElementById("student-id").value;
+  const pw = document.getElementById("student-pw").value;
+
+  const error = document.getElementById("login-error");
+  error.innerText = "";
+
+  if (!id || !pw) {
+    error.innerText = "번호와 비밀번호를 입력하세요.";
+    return;
+  }
+
+  const snap = await db.ref(`${PATH.STUDENTS}/${id}`).once("value");
+  const data = snap.val();
+
+  if (!data) {
+    error.innerText = "존재하지 않는 번호입니다.";
+    return;
+  }
+
+  if (data.password !== pw) {
+    error.innerText = "비밀번호가 틀렸습니다.";
+    return;
+  }
+
+  myId = id;
+  myData = data;
+
+  // 저장 (새로고침 대응)
+  localStorage.setItem("myId", myId);
+
+  await db.ref(`${PATH.STUDENTS}/${id}`).update({
+    status: STUDENT_STATE.ONLINE
+  });
+
+  listenGameState();
+  listenMyData();
+});
+
+
+/* =========================
+   결과 표시 개선
+========================= */
+
+function showResult(final = false) {
+  showView("result-view");
+
+  const box = document.getElementById("final-seat");
+
+  if (myData?.seat) {
+    box.innerHTML = `
+      <h3>내 번호: ${myId}</h3>
+      <p>선택 좌석: ${myData.seat}</p>
+    `;
+  } else {
+    box.innerHTML = `<p>아직 좌석을 선택하지 않았습니다.</p>`;
+  }
+
+  if (final) {
+    document.querySelector("#result-view h2").innerText = "🎉 최종 결과";
+  }
+}
+
+
+/* =========================
+   초기화 대응 (관리자가 reset 했을 때)
+========================= */
+
+db.ref(`${PATH.GAME}`).on("value", (snap) => {
+  const game = snap.val();
+
+  if (!game) return;
+
+  if (game.state === GAME_STATE.WAIT) {
+
+    // reset 시 로그인 유지 + 화면 초기화
+    if (myId) {
+      showView("wait-view");
+      document.getElementById("wait-id").innerText = myId;
+    }
+
+    // 선택 상태 초기화 감지
+    if (myData && !myData.seat) {
+      renderSeats();
+    }
+  }
+});
+
+
+/* =========================
+   UX 보정 (모달 초기화)
+========================= */
+
+function resetModal() {
+  document.getElementById("captcha-input").value = "";
+  selectedSeat = null;
+}
+
+
+/* =========================
+   ESC로 모달 닫기
+========================= */
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    document.getElementById("modal").classList.add("hidden");
+    resetModal();
+  }
 });
