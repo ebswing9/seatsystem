@@ -1,4 +1,5 @@
-document.addEventListener("DOMContentLoaded", () => {
+let db = firebase.database();
+
 /* =========================
    상태
 ========================= */
@@ -272,5 +273,3 @@ function listenSeats() {
     });
 
 }
-
-}); // 🌟 맨 마지막 줄을 중괄호와 소괄호, 세미콜론이 포함된 }); 로 정상 수정 완료
