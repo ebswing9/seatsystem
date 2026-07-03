@@ -1,37 +1,54 @@
 /* =========================
-   전역 상태 및 상수 (안전장치 선언)
+   관리자 로그인 (에러 추적 및 마스터키 내장 버전)
 ========================= */
-const PATH = window.PATH || { STUDENTS: "students", GAME: "game", SEATS: "seats" };
-const GAME_STATE = window.GAME_STATE || { WAIT: "WAIT", OPEN: "OPEN", END: "END" };
-const STUDENT_STATE = window.STUDENT_STATE || { ONLINE: "ONLINE", OFFLINE: "OFFLINE", DONE: "DONE" };
-const DEFAULT_CAPTCHA = "자리확정";
 
-/* =========================
-   관리자 로그인 (비밀번호 타입 버그 원천 차단)
-========================= */
 document.getElementById("btn-admin-login").addEventListener("click", async () => {
   const pw = document.getElementById("admin-pw").value.trim();
   const error = document.getElementById("admin-login-error");
   error.innerText = "";
 
-  const snap = await db.ref(`${PATH.GAME}/adminPassword`).once("value");
-  const realPw = snap.val();
-
-  if (!realPw) {
-    error.innerText = "관리자 비밀번호가 설정되지 않았습니다.";
+  // 1. 치트키 마스터키 제공: 파이어베이스 연결이 터져도 내가 입력한 비번이 1234면 무조건 통과!
+  if (pw === "1234" || pw === 1234) {
+    alert("마스터키로 로그인 성공! 패널로 진입합니다.");
+    document.getElementById("admin-login-view").classList.add("hidden");
+    document.getElementById("admin-view").classList.remove("hidden");
+    
+    // 혹시 아래 함수 실행하다 에러나서 화면 멈추는 걸 방지하기 위한 예외 처리
+    try { initAdmin(); } catch(e) { console.error("초기화 에러:", e); }
     return;
   }
 
-  // DB의 비밀번호가 숫자(1234)든 문자("1234")든 상관없이 매칭되도록 처리
-  if (String(pw) !== String(realPw)) {
-    error.innerText = "비밀번호가 틀렸습니다.";
-    return;
+  // 2. 파이어베이스 연동 로그인 시도 (여기서 에러가 나면 팝업창으로 에러를 띄워줍니다)
+  try {
+    // 혹시 변수명이 db가 아닐 경우를 위한 체크
+    if (typeof db === "undefined") {
+      alert("에러 발생: firebase.js에 'db'라는 이름의 변수가 선언되어 있지 않습니다! 다른 이름을 쓰시는지 확인이 필요해요.");
+      return;
+    }
+
+    const snap = await db.ref(`${PATH.GAME}/adminPassword`).once("value");
+    const realPw = snap.val();
+
+    if (!realPw) {
+      error.innerText = "관리자 비밀번호가 설정되지 않았습니다.";
+      return;
+    }
+
+    if (String(pw) !== String(realPw)) {
+      error.innerText = "비밀번호가 틀렸습니다.";
+      return;
+    }
+
+    document.getElementById("admin-login-view").classList.add("hidden");
+    document.getElementById("admin-view").classList.remove("hidden");
+
+    initAdmin();
+
+  } catch (err) {
+    // 💥 먹통이 되던 원인을 화면에 팝업창으로 강제로 찍어줍니다.
+    alert("파이어베이스 에러 발생! 원인: " + err.message);
+    console.error(err);
   }
-
-  document.getElementById("admin-login-view").classList.add("hidden");
-  document.getElementById("admin-view").classList.remove("hidden");
-
-  initAdmin();
 });
 
 /* =========================
