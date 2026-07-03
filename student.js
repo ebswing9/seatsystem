@@ -54,6 +54,9 @@ document.getElementById("btn-login").addEventListener("click", async () => {
 /* =========================
    리스너 통합 (중복 방지)
 ========================= */
+/* =========================
+   리스너 통합 (수정됨)
+========================= */
 function initListeners() {
     // 1. 게임 상태 감시
     db.ref(`${PATH.GAME}`).on("value", (snap) => {
@@ -71,11 +74,11 @@ function initListeners() {
             }
         } else if (currentGame.state === GAME_STATE.END) {
             document.getElementById("modal").classList.add("hidden");
-            showResult(true);
+            showResult(true); // 여기서 전체 결과 지도 띄움
         }
     });
 
-    // 2. 좌석 실시간 감시
+    // 2. 좌석 실시간 감시 (좌석 이름 R1C1 숨김 처리됨)
     db.ref(`${PATH.SEATS}`).on("value", (snap) => {
         const seats = snap.val() || {};
         const container = document.getElementById("seat-container");
@@ -89,14 +92,14 @@ function initListeners() {
             if (seat.owner) {
                 div.classList.add("taken");
                 if (seat.owner === myId) {
-                    div.innerText = `${seat.owner} (내 자리)`;
+                    div.innerText = seat.owner; // 내 자리엔 내 번호 표시
                     div.classList.add("my-seat");
                 } else {
-                    div.innerText = "선점됨";
-                    div.classList.add("other-taken"); // 회색 처리용
+                    div.innerText = "●"; // 다른 사람 자리는 점으로 표시
+                    div.classList.add("other-taken");
                 }
             } else {
-                div.innerText = seatId;
+                div.innerText = ""; // 빈 자리는 아무 글자도 안 보이게 설정
                 div.onclick = () => openModal(seatId);
             }
             container.appendChild(div);
@@ -111,23 +114,46 @@ function initListeners() {
         }
     });
 }
-
 /* =========================
    결과 화면
+========================= */
+/* =========================
+   결과 화면 (수정됨)
 ========================= */
 function showResult(final = false) {
     showView("result-view");
     const box = document.getElementById("final-seat");
-    if (myData?.seat) {
-        box.innerHTML = `<h3>내 번호: ${myId}</h3><p>선택 좌석: ${myData.seat}</p>`;
-    } else {
-        box.innerHTML = `<p>아직 좌석을 선택하지 않았습니다.</p>`;
-    }
+    
+    // 최종 결과 모드일 때
     if (final) {
-        document.querySelector("#result-view h2").innerText = "🎉 최종 결과";
+        document.querySelector("#result-view h2").innerText = "🎉 최종 자리 배치 결과";
+        
+        // 전체 좌석을 불러와서 표 형태로 표시
+        db.ref(`${PATH.SEATS}`).once("value", (snap) => {
+            const seats = snap.val() || {};
+            let html = `<div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-top:10px;">`;
+            
+            // 좌석 순서대로(R1C1~R5C5) 출력
+            for (const seatId in seats) {
+                const owner = seats[seatId].owner || "-";
+                html += `<div style="border:1px solid #ccc; padding:5px; font-size:11px; text-align:center;">
+                          ${seatId}<br><b>${owner}</b>
+                        </div>`;
+            }
+            html += `</div>`;
+            box.innerHTML = html;
+        });
+    } 
+    // 그냥 결과창 모드일 때 (내 자리 확인)
+    else {
+        document.querySelector("#result-view h2").innerText = "자리 배치 결과";
+        if (myData?.seat) {
+            box.innerHTML = `<h3>내 번호: ${myId}</h3><p>선택 좌석: ${myData.seat}</p>`;
+        } else {
+            box.innerHTML = `<p>아직 좌석을 선택하지 않았습니다.</p>`;
+        }
     }
 }
-
 /* =========================
    좌석 클릭 처리
 ========================= */
