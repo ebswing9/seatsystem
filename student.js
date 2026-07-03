@@ -189,13 +189,20 @@ document.getElementById("btn-confirm").addEventListener("click", async () => {
     document.getElementById("modal").classList.add("hidden");
 });
 
+
 window.addEventListener("load", async () => {
     const savedId = localStorage.getItem("myId");
     if (savedId) {
         myId = savedId;
         const snap = await db.ref(`${PATH.STUDENTS}/${myId}`).once("value");
         myData = snap.val();
-        if (myData) initListeners();
+        if (myData) {
+            // 핵심: 앱이 로드될 때마다 현재 상태를 ONLINE으로 갱신
+            await db.ref(`${PATH.STUDENTS}/${myId}`).update({ 
+                status: STUDENT_STATE.ONLINE 
+            });
+            initListeners();
+        }
     }
 });
 

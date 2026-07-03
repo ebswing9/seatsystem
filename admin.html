@@ -62,10 +62,20 @@
     </div>
 
     <!-- 좌석 현황 -->
-    <div class="panel">
-      <h3>🪑 좌석 현황</h3>
-      <div id="admin-seat-grid" class="seat-grid"></div>
-    </div>
+ <!-- admin.html의 좌석 현황 부분 -->
+<div class="panel">
+  <h3>🪑 좌석 현황</h3>
+  
+  <!-- 여기가 학생 페이지와 동일한 칠판/창문/분단 구조 -->
+  <div class="classroom-container">
+      <div class="blackboard">칠 판 (Screen)</div>
+      <div class="main-area">
+          <div class="side-area window-side"><span>창</span><span>문</span></div>
+          <div id="admin-seat-grid" class="seat-grid"></div>
+          <div class="side-area door-side"><span>복</span><span>도</span></div>
+      </div>
+  </div>
+</div>
 
   </div>
 </div>

@@ -152,41 +152,40 @@ function listenStudents() {
    좌석 실시간 렌더링 (관리자용)
 ========================= */
 
+/* =========================
+   좌석 실시간 렌더링 (관리자용 - 수정됨)
+========================= */
 function listenSeats() {
   db.ref(`${PATH.SEATS}`).on("value", (snap) => {
-
     const seats = snap.val();
     const container = document.getElementById("admin-seat-grid");
-
     container.innerHTML = "";
 
     for (const id in seats) {
-
       const seat = seats[id];
-
       const div = document.createElement("div");
       div.className = "seat";
 
+      // 1. 좌석 상태에 따른 스타일 적용
       if (seat.locked) div.classList.add("locked");
-      if (seat.owner) div.classList.add("taken");
+      if (seat.owner) {
+        div.classList.add("taken");
+        div.innerText = seat.owner; // 학번만 표시
+      } else {
+        div.innerText = ""; // 빈 자리엔 아무것도 표시 안 함
+      }
 
-      div.innerText = seat.owner ? seat.owner : id;
-
-      // 좌석 잠금 토글
+      // 2. 좌석 클릭 시 잠금 토글
       div.addEventListener("click", async () => {
-
         await db.ref(`${PATH.SEATS}/${id}`).update({
           locked: !seat.locked
         });
-
       });
 
       container.appendChild(div);
     }
   });
 }
-
-
 /* =========================
    게임 상태 표시
 ========================= */

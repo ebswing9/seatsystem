@@ -84,31 +84,24 @@ button:hover {
 
 /* 1. 분단 사이 여백을 위해 6열 사이에 간격을 줍니다 */
 /* style.css */
+.classroom-container { padding: 20px; background: #f9fafb; border-radius: 12px; }
+.blackboard { width: 100%; height: 50px; background: #064e3b; color: white; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; }
+.main-area { display: flex; gap: 10px; }
+.side-area { width: 40px; background: #e5e7eb; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+
+/* 핵심: 2열 + 간격 + 2열 + 간격 + 2열 구조 */
 .seat-grid { 
     display: grid; 
-    /* 2열, 간격, 2열, 간격, 2열 순서로 배치 */
-    grid-template-columns: 1fr 1fr 20px 1fr 1fr 20px 1fr 1fr; 
+    grid-template-columns: 1fr 1fr 30px 1fr 1fr 30px 1fr 1fr; 
     row-gap: 15px; 
     column-gap: 10px;
     flex-grow: 1; 
 }
-
-/* 2. 좌석 이름(R1C1 등) 숨기기 */
 .seat { 
-    height: 50px; 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    background: white; 
-    border: 2px solid #d1d5db; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    font-size: 0px; /* 글자 크기를 0으로 해서 안 보이게 함 */
-    transition: all 0.2s; 
+    height: 50px; display: flex; justify-content: center; align-items: center; 
+    background: white; border: 2px solid #d1d5db; border-radius: 8px; cursor: pointer;
 }
-
-/* 좌석에 학생 이름/번호가 들어있을 때만 글자 다시 보이기 */
-.seat.taken { font-size: 0.9rem; }
+.seat.taken { background-color: #d1d5db; }
 
 .seat.locked {
   background: #333;
