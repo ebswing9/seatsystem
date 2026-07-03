@@ -27,6 +27,15 @@ const studentPasswordInput = document.getElementById("studentPassword");
 const seatGrid = document.getElementById("seatGrid");
 const resultSeatGrid = document.getElementById("resultSeatGrid");
 
+document.addEventListener("DOMContentLoaded", () => {
+/* 상태 변수 및 DOM 선언들... */
+const loginView = document.getElementById("loginView");
+
+// 🌟 [여기에 추가] 브라우저가 켜지자마자 로그인 화면을 강제로 보여줍니다.
+loginView.classList.remove("hidden");
+loginView.style.setProperty("display", "flex", "important"); 
+// (CSS가 block인지 flex인지 모를 땐 일단 무조건 보이게 !important를 줍니다)
+   
 /* =========================
    로그인
 ========================= */
