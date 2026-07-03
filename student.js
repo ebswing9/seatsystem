@@ -1,12 +1,3 @@
-/* =========================
-   [안전장치] 전역 변수 중복 선언 방지
-   let이나 const 대신 전역 객체(window)를 활용해 충돌을 원천 차단합니다.
-========================= */
-if (!window.PATH) window.PATH = { STUDENTS: "students", GAME: "game", SEATS: "seats" };
-if (!window.GAME_STATE) window.GAME_STATE = { WAIT: "WAIT", OPEN: "OPEN", END: "END" };
-if (!window.STUDENT_STATE) window.STUDENT_STATE = { ONLINE: "ONLINE", OFFLINE: "OFFLINE", DONE: "DONE" };
-if (!window.DEFAULT_CAPTCHA) window.DEFAULT_CAPTCHA = "자리확정";
-
 // 전역 스코프 안전 바인딩
 let currentStudentId = null;
 let currentStudentPw = null;
