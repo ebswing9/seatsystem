@@ -1,91 +1,407 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>학급 자리배치 티켓팅</title>
 
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
 
-  <!-- Firebase (compat) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>학급 자리배치 티켓팅</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css">
+
+    <!-- Firebase -->
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
 </head>
 
 <body>
 
-<!-- =========================
-  1. 로그인 화면
-========================= -->
-<div id="login-view" class="view">
-  <div class="card">
-    <h2>🎟 자리배치 티켓팅</h2>
+<!-- ==========================================================
+학생 로그인
+========================================================== -->
 
-    <input id="student-id" type="number" placeholder="번호 (1~29)" min="1" max="29"/>
-    <input id="student-pw" type="password" placeholder="비밀번호"/>
+<section
+    id="loginView"
+    class="view">
 
-    <button id="btn-login">입장</button>
+    <div class="loginCard">
 
-    <p id="login-error" class="error-text"></p>
-  </div>
+        <h1>
+
+            🎟️ 학급 자리배치
+
+        </h1>
+
+        <p>
+
+            번호와 비밀번호를 입력하세요.
+
+        </p>
+
+        <input
+
+            id="studentNumber"
+
+            type="number"
+
+            min="1"
+
+            max="29"
+
+            placeholder="번호"
+
+        >
+
+        <input
+
+            id="studentPassword"
+
+            type="password"
+
+            placeholder="비밀번호"
+
+        >
+
+        <button
+
+            id="loginBtn">
+
+            입장하기
+
+        </button>
+
+        <button
+
+            id="adminPageBtn"
+
+            class="secondary">
+
+            관리자
+
+        </button>
+
+        <div
+
+            id="loginMessage"
+
+            class="message">
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ==========================================================
+대기 화면
+========================================================== -->
+
+<section
+
+    id="waitingView"
+
+    class="view hidden">
+
+    <div class="waitingCard">
+
+        <div class="spinner"></div>
+
+        <h2>
+
+            대기 중...
+
+        </h2>
+
+        <p>
+
+            선생님이 시작 버튼을 누를 때까지
+            기다려 주세요.
+
+        </p>
+
+        <div class="myNumber">
+
+            내 번호
+
+            <strong id="waitingStudentNumber">
+
+                -
+
+            </strong>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ==========================================================
+티켓팅 화면
+========================================================== -->
+
+<section
+
+    id="ticketView"
+
+    class="view hidden">
+
+    <header class="topBar">
+
+        <div>
+
+            내 번호
+
+            <strong id="myNumber">
+
+                -
+
+            </strong>
+
+        </div>
+
+        <div id="ticketStatus">
+
+            🟢 진행 중
+
+        </div>
+
+    </header>
+
+    <div class="classroom">
+
+        <div class="leftLabel">
+
+            🪟 창문
+
+        </div>
+
+        <div class="centerRoom">
+
+            <div class="blackboard">
+
+                칠판
+
+            </div>
+
+            <div
+
+                id="seatGrid"
+
+                class="seatGrid">
+
+                <!-- JS 생성 -->
+
+            </div>
+
+        </div>
+
+        <div class="rightLabel">
+
+            🚪 복도
+
+        </div>
+
+    </div>
+
+    <div class="legend">
+
+        <div>
+
+            <span class="box empty"></span>
+
+            빈자리
+
+        </div>
+
+        <div>
+
+            <span class="box mine"></span>
+
+            내 자리
+
+        </div>
+
+        <div>
+
+            <span class="box occupied"></span>
+
+            다른 학생
+
+        </div>
+
+        <div>
+
+            <span class="box locked"></span>
+
+            사용 안 함
+
+        </div>
+
+    </div>
+
+</section>
+<!-- ==========================================================
+자리 확정 모달
+========================================================== -->
+
+<div
+
+    id="confirmModal"
+
+    class="modal hidden">
+
+    <div class="modalContent">
+
+        <h2>
+
+            자리 확정
+
+        </h2>
+
+        <p>
+
+            선택한 자리를 확정하려면
+            인증단어를 입력하세요.
+
+        </p>
+
+        <div
+
+            id="captchaDisplay"
+
+            class="captchaDisplay">
+
+            자리확정
+
+        </div>
+
+        <input
+
+            id="captchaInput"
+
+            type="text"
+
+            placeholder="인증단어 입력">
+
+        <div class="modalButtons">
+
+            <button
+
+                id="confirmSeatBtn">
+
+                확정
+
+            </button>
+
+            <button
+
+                id="cancelSeatBtn"
+
+                class="secondary">
+
+                취소
+
+            </button>
+
+        </div>
+
+    </div>
+
 </div>
 
-<!-- =========================
-  2. 대기 화면
-========================= -->
-<div id="wait-view" class="view hidden">
-  <div class="card">
-    <h2>⏳ 대기 중</h2>
-    <p>선생님이 시작 버튼을 누를 때까지 기다리세요.</p>
-    <p>번호: <span id="wait-id"></span></p>
-  </div>
+<!-- ==========================================================
+최종 결과
+========================================================== -->
+
+<section
+
+    id="resultView"
+
+    class="view hidden">
+
+    <header class="resultHeader">
+
+        <h2>
+
+            📋 자리배치 결과
+
+        </h2>
+
+        <p>
+
+            모든 학생의 자리가 공개되었습니다.
+
+        </p>
+
+    </header>
+
+    <div class="classroom">
+
+        <div class="leftLabel">
+
+            🪟 창문
+
+        </div>
+
+        <div class="centerRoom">
+
+            <div class="blackboard">
+
+                칠판
+
+            </div>
+
+            <div
+
+                id="resultSeatGrid"
+
+                class="seatGrid resultGrid">
+
+            </div>
+
+        </div>
+
+        <div class="rightLabel">
+
+            🚪 복도
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ==========================================================
+알림 토스트
+========================================================== -->
+
+<div
+
+    id="toast"
+
+    class="toast hidden">
+
 </div>
 
-<!-- =========================
-  3. 티켓팅 화면
-========================= -->
-<div id="main-view" class="view hidden">
-  <div class="card wide">
-
-    <h2>🪑 좌석 선택</h2>
-
-    <div id="seat-container" class="seat-grid"></div>
-
-  </div>
-</div>
-
-<!-- =========================
-  4. 인증 모달
-========================= -->
-<div id="modal" class="modal hidden">
-  <div class="modal-box">
-    <h3>좌석 확정</h3>
-
-    <p>인증 단어를 입력하세요</p>
-
-    <p class="captcha-box" id="captcha-text">---</p>
-
-    <input id="captcha-input" type="text" placeholder="단어 입력"/>
-
-    <button id="btn-confirm">확정</button>
-    <button id="btn-cancel">취소</button>
-  </div>
-</div>
-
-<!-- =========================
-  5. 결과 화면
-========================= -->
-<div id="result-view" class="view hidden">
-  <div class="card">
-    <h2>✅ 선택 완료</h2>
-    <p>최종 결과를 기다리세요.</p>
-
-    <div id="final-seat"></div>
-  </div>
-</div>
+<!-- ==========================================================
+Firebase
+========================================================== -->
 
 <script src="firebase.js"></script>
-<script src="student.js"></script>
+
+<!-- 학생 로직 -->
+
+<script src="script.js"></script>
 
 </body>
+
 </html>

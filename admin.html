@@ -1,77 +1,371 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>관리자 - 자리배치</title>
 
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>관리자 페이지</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css">
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
 </head>
 
 <body>
 
-<!-- =========================
-  1. 관리자 로그인
-========================= -->
-<div id="admin-login-view" class="view">
-  <div class="card">
-    <h2>👨‍🏫 관리자 로그인</h2>
+<!-- ==========================================================
+관리자 로그인
+========================================================== -->
 
-    <input id="admin-pw" type="password" placeholder="관리자 비밀번호"/>
+<section
 
-    <button id="btn-admin-login">로그인</button>
+    id="adminLoginView"
 
-    <p id="admin-login-error" class="error-text"></p>
-  </div>
+    class="view">
+
+    <div class="loginCard">
+
+        <h1>
+
+            관리자 로그인
+
+        </h1>
+
+        <input
+
+            id="adminPassword"
+
+            type="password"
+
+            placeholder="관리자 비밀번호">
+
+        <button
+
+            id="adminLoginBtn">
+
+            로그인
+
+        </button>
+
+        <div
+
+            id="adminLoginMessage"
+
+            class="message">
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ==========================================================
+관리자 화면
+========================================================== -->
+
+<section
+
+    id="adminView"
+
+    class="view hidden">
+
+<header class="adminHeader">
+
+    <h1>
+
+        🎟️ 자리배치 관리자
+
+    </h1>
+
+    <button
+
+        id="logoutBtn"
+
+        class="secondary">
+
+        로그아웃
+
+    </button>
+
+</header>
+
+<!-- ==========================================================
+게임 제어
+========================================================== -->
+
+<div class="adminCard">
+
+    <h2>
+
+        게임 제어
+
+    </h2>
+
+    <div class="buttonRow">
+
+        <button id="startBtn">
+
+            시작
+
+        </button>
+
+        <button id="endBtn">
+
+            종료
+
+        </button>
+
+        <button id="resetBtn">
+
+            초기화
+
+        </button>
+
+    </div>
+
 </div>
 
-<!-- =========================
-  2. 관리자 패널
-========================= -->
-<div id="admin-view" class="view hidden">
-  <div class="card wide">
+<!-- ==========================================================
+인증단어
+========================================================== -->
 
-    <h2>📊 관리자 패널</h2>
+<div class="adminCard">
 
-    <!-- 인증 단어 -->
-    <div class="panel">
-      <h3>🔐 인증 단어</h3>
-      <input id="captcha-admin" type="text" placeholder="예: 자리확정"/>
-      <button id="btn-set-captcha">적용</button>
-      <p id="captcha-status"></p>
-    </div>
+    <h2>
 
-    <!-- 게임 제어 -->
-    <div class="panel">
-      <h3>🎮 게임 제어</h3>
+        인증단어
 
-      <button id="btn-start">▶ 시작</button>
-      <button id="btn-end">⏹ 종료</button>
-      <button id="btn-reset">🔄 초기화</button>
-    </div>
+    </h2>
 
-    <!-- 접속 현황 -->
-    <div class="panel">
-      <h3>👥 접속 현황</h3>
-      <p id="connect-count">0 / 29</p>
-      <div id="student-list"></div>
-    </div>
+    <input
 
-    <!-- 좌석 현황 -->
-    <div class="panel">
-      <h3>🪑 좌석 현황</h3>
-      <div id="admin-seat-grid" class="seat-grid"></div>
-    </div>
+        id="captchaWord"
 
-  </div>
+        type="text"
+
+        placeholder="예 : 자리확정">
+
+    <button
+
+        id="saveCaptchaBtn">
+
+        저장
+
+    </button>
+
 </div>
+
+<!-- ==========================================================
+접속 학생
+========================================================== -->
+
+<div class="adminCard">
+
+    <h2>
+
+        접속 학생
+
+        (<span id="onlineCount">0</span>명)
+
+    </h2>
+
+    <div
+
+        id="onlineStudentList"
+
+        class="studentList">
+
+    </div>
+
+</div>
+
+<!-- ==========================================================
+학생 관리
+========================================================== -->
+
+<div class="adminCard">
+
+    <div class="studentTitle">
+
+        <h2>
+
+            학생 관리
+
+        </h2>
+
+        <button
+
+            id="generateStudentsBtn">
+
+            1~29 자동생성
+
+        </button>
+
+    </div>
+
+    <table class="studentTable">
+
+        <thead>
+
+            <tr>
+
+                <th>번호</th>
+
+                <th>비밀번호</th>
+
+                <th>저장</th>
+
+                <th>삭제</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody id="studentTableBody">
+
+        </tbody>
+
+    </table>
+
+    <button
+
+        id="addStudentBtn">
+
+        학생 추가
+
+    </button>
+
+</div>
+<!-- ==========================================================
+실시간 좌석 현황
+========================================================== -->
+
+<div class="adminCard">
+
+    <h2>
+
+        실시간 좌석 현황
+
+    </h2>
+
+    <div class="classroom">
+
+        <div class="leftLabel">
+
+            🪟 창문
+
+        </div>
+
+        <div class="centerRoom">
+
+            <div class="blackboard">
+
+                칠판
+
+            </div>
+
+            <!--
+                관리자용 좌석판
+
+                학생번호 표시
+
+                (학생은 번호 안 보임)
+            -->
+
+            <div
+
+                id="adminSeatGrid"
+
+                class="seatGrid adminGrid">
+
+            </div>
+
+        </div>
+
+        <div class="rightLabel">
+
+            🚪 복도
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ==========================================================
+게임 상태
+========================================================== -->
+
+<div class="adminCard">
+
+    <h2>
+
+        게임 상태
+
+    </h2>
+
+    <div class="statusRow">
+
+        현재 상태 :
+
+        <strong id="gameStateText">
+
+            WAIT
+
+        </strong>
+
+    </div>
+
+    <div class="statusRow">
+
+        예약 완료 :
+
+        <strong id="reservedCount">
+
+            0
+
+        </strong>
+
+        / 29
+
+    </div>
+
+</div>
+
+<!-- ==========================================================
+공지
+========================================================== -->
+
+<div
+
+    id="adminToast"
+
+    class="toast hidden">
+
+</div>
+
+</section>
+
+<!-- ==========================================================
+Firebase
+========================================================== -->
 
 <script src="firebase.js"></script>
+
+<!-- 관리자 로직 -->
+
 <script src="admin.js"></script>
 
 </body>
+
 </html>
