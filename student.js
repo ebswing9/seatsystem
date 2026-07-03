@@ -1,3 +1,4 @@
+window.addEventListener('DOMContentLoaded', () => {
 /* ==========================================
    학생 메인 로직 (오리지널 복원 버전)
 ========================================== */
@@ -197,4 +198,5 @@ document.getElementById("btn-confirm-captcha").addEventListener("click", async (
   } catch (error) {
     alert("예약 오류: " + error.message);
   }
+});
 });
