@@ -239,4 +239,4 @@ document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
         document.getElementById("modal").classList.add("hidden");
     }
-});
+});}
