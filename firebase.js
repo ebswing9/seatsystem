@@ -1,5 +1,5 @@
 const firebaseConfig = {
-  apiKey: "AIzaSyDdyqY1mqGdJvwXetIDwK7EmJ2pyep1-Xk",
+  apiKey: "process.env.FIREBASE_API_KEY",
   authDomain: "classseat-70199.firebaseapp.com",
   databaseURL: "https://classseat-70199-default-rtdb.firebaseio.com",
   projectId: "classseat-70199",
