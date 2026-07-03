@@ -1,275 +1,230 @@
-let db = firebase.database();
-
-/* =========================
-   상태
-========================= */
-
-let gameState = "WAIT";
-
-/* =========================
-   DOM
-========================= */
-
-const adminLoginView = document.getElementById("adminLoginView");
-const adminView = document.getElementById("adminView");
-
-const adminPasswordInput = document.getElementById("adminPassword");
-const adminLoginBtn = document.getElementById("adminLoginBtn");
-
-const startBtn = document.getElementById("startBtn");
-const endBtn = document.getElementById("endBtn");
-const resetBtn = document.getElementById("resetBtn");
-
-const captchaInput = document.getElementById("captchaWord");
-const saveCaptchaBtn = document.getElementById("saveCaptchaBtn");
-
-const onlineList = document.getElementById("onlineStudentList");
-const onlineCount = document.getElementById("onlineCount");
-
-const seatGrid = document.getElementById("adminSeatGrid");
-
-const studentTableBody = document.getElementById("studentTableBody");
 
 /* =========================
    관리자 로그인
 ========================= */
 
-adminLoginBtn.onclick = () => {
+document.getElementById("btn-admin-login").addEventListener("click", async () => {
 
-    const pw = adminPasswordInput.value;
+  const pw = document.getElementById("admin-pw").value;
+  const error = document.getElementById("admin-login-error");
 
-    db.ref("game/adminPassword").once("value", snap => {
+  error.innerText = "";
 
-        const realPw = snap.val();
+  const snap = await db.ref(`${PATH.GAME}/adminPassword`).once("value");
+  const realPw = snap.val();
 
-        if (!realPw) {
-            alert("관리자 비밀번호가 설정되지 않았습니다");
-            return;
-        }
+  if (!realPw) {
+    error.innerText = "관리자 비밀번호가 설정되지 않았습니다.";
+    return;
+  }
 
-        if (pw !== realPw) {
-            alert("비밀번호가 틀렸습니다");
-            return;
-        }
+  if (pw !== realPw) {
+    error.innerText = "비밀번호가 틀렸습니다.";
+    return;
+  }
 
-        adminLoginView.classList.add("hidden");
-        adminView.classList.remove("hidden");
+  document.getElementById("admin-login-view").classList.add("hidden");
+  document.getElementById("admin-view").classList.remove("hidden");
 
-        listenGameState();
-        listenSeats();
-        listenOnline();
+  initAdmin();
+});
 
-        loadStudents();
-
-    });
-
-};
 
 /* =========================
-   게임 상태 감시
+   관리자 초기화
 ========================= */
 
-function listenGameState() {
-
-    db.ref("game/state").on("value", snap => {
-
-        gameState = snap.val();
-
-        document.getElementById("gameStateText").innerText = gameState;
-
-    });
-
+function initAdmin() {
+  listenStudents();
+  listenSeats();
+  listenGame();
 }
 
-/* =========================
-   START 게임
-========================= */
-
-startBtn.onclick = () => {
-
-    db.ref("game/state").set("RUN");
-
-};
 
 /* =========================
-   END 게임
+   게임 상태 제어
 ========================= */
 
-endBtn.onclick = () => {
+document.getElementById("btn-start").addEventListener("click", async () => {
 
-    db.ref("game/state").set("END");
+  const snap = await db.ref(`${PATH.GAME}/captcha`).once("value");
 
-};
+  if (!snap.val()) {
+    alert("인증 단어를 먼저 설정하세요.");
+    return;
+  }
+
+  await db.ref(`${PATH.GAME}`).update({
+    state: GAME_STATE.OPEN
+  });
+
+  alert("티켓팅 시작!");
+});
+
+
+document.getElementById("btn-end").addEventListener("click", async () => {
+
+  await db.ref(`${PATH.GAME}`).update({
+    state: GAME_STATE.END
+  });
+
+  alert("티켓팅 종료!");
+});
+
+
+document.getElementById("btn-reset").addEventListener("click", async () => {
+
+  const ok = confirm("전체 초기화하시겠습니까?");
+  if (!ok) return;
+
+  await db.ref("/").set({
+    game: {
+      state: GAME_STATE.WAIT,
+      captcha: DEFAULT_CAPTCHA,
+      adminPassword: "1234"
+    },
+    students: generateStudents(),
+    seats: generateSeats()
+  });
+
+  alert("초기화 완료!");
+});
+
 
 /* =========================
-   RESET
+   인증 단어 설정
 ========================= */
 
-resetBtn.onclick = () => {
+document.getElementById("btn-set-captcha").addEventListener("click", async () => {
 
-    db.ref("game/state").set("WAIT");
+  const value = document.getElementById("captcha-admin").value.trim();
 
-    db.ref("seats").remove();
+  if (!value) {
+    alert("단어를 입력하세요.");
+    return;
+  }
 
-};
+  await db.ref(`${PATH.GAME}`).update({
+    captcha: value
+  });
+
+  document.getElementById("captcha-status").innerText =
+    `현재 단어: ${value}`;
+});
+
 
 /* =========================
-   인증단어 저장
+   학생 목록 실시간
 ========================= */
 
-saveCaptchaBtn.onclick = () => {
+function listenStudents() {
+  db.ref(`${PATH.STUDENTS}`).on("value", (snap) => {
 
-    const value = captchaInput.value;
+    const data = snap.val() || {};
+    const list = document.getElementById("student-list");
 
-    db.ref("game/captcha").set(value);
+    list.innerHTML = "";
 
-    alert("저장 완료");
+    let count = 0;
+    let done = 0;
 
-};
+    for (const id in data) {
 
-/* =========================
-   학생 생성 (1~29)
-========================= */
+      count++;
 
-document.getElementById("generateStudentsBtn").onclick = () => {
+      if (data[id].status === STUDENT_STATE.DONE) done++;
 
-    for (let i = 1; i <= 29; i++) {
+      const div = document.createElement("div");
 
-        db.ref("students/" + i).set({
-            password: "1234"
-        });
+      div.innerText =
+        `#${id} - ${data[id].status || "OFFLINE"} - ${data[id].seat || "-"}`;
 
+      list.appendChild(div);
     }
 
-    alert("학생 생성 완료");
-
-};
-
-/* =========================
-   학생 목록 로드
-========================= */
-
-function loadStudents() {
-
-    db.ref("students").on("value", snap => {
-
-        const data = snap.val() || {};
-
-        studentTableBody.innerHTML = "";
-
-        Object.keys(data).forEach(num => {
-
-            const row = document.createElement("tr");
-
-            row.innerHTML = `
-                <td>${num}</td>
-                <td>
-                    <input value="${data[num].password || ''}" 
-                           onchange="updatePassword('${num}', this.value)">
-                </td>
-                <td>✔</td>
-                <td>
-                    <button onclick="deleteStudent('${num}')">삭제</button>
-                </td>
-            `;
-
-            studentTableBody.appendChild(row);
-
-        });
-
-    });
-
+    document.getElementById("connect-count").innerText =
+      `${count} / 29`;
+  });
 }
 
-/* =========================
-   비밀번호 수정
-========================= */
-
-window.updatePassword = (num, pw) => {
-
-    db.ref("students/" + num + "/password").set(pw);
-
-};
 
 /* =========================
-   학생 삭제
-========================= */
-
-window.deleteStudent = (num) => {
-
-    db.ref("students/" + num).remove();
-
-};
-
-/* =========================
-   접속자 확인 (간단 버전)
-========================= */
-
-function listenOnline() {
-
-    db.ref("online").on("value", snap => {
-
-        const data = snap.val() || {};
-
-        onlineList.innerHTML = "";
-
-        let count = 0;
-
-        Object.keys(data).forEach(num => {
-
-            count++;
-
-            const div = document.createElement("div");
-
-            div.innerText = `학생 ${num}`;
-
-            onlineList.appendChild(div);
-
-        });
-
-        onlineCount.innerText = count;
-
-    });
-
-}
-
-/* =========================
-   좌석 관리자 뷰
+   좌석 실시간 렌더링 (관리자용)
 ========================= */
 
 function listenSeats() {
+  db.ref(`${PATH.SEATS}`).on("value", (snap) => {
 
-    db.ref("seats").on("value", snap => {
+    const seats = snap.val();
+    const container = document.getElementById("admin-seat-grid");
 
-        const seats = snap.val() || {};
+    container.innerHTML = "";
 
-        seatGrid.innerHTML = "";
+    for (const id in seats) {
 
-        const rows = 5;
-        const cols = 6;
+      const seat = seats[id];
 
-        for (let r = 1; r <= rows; r++) {
+      const div = document.createElement("div");
+      div.className = "seat";
 
-            for (let c = 1; c <= cols; c++) {
+      if (seat.locked) div.classList.add("locked");
+      if (seat.owner) div.classList.add("taken");
 
-                const id = `R${r}C${c}`;
+      div.innerText = seat.owner ? seat.owner : id;
 
-                const div = document.createElement("div");
+      // 좌석 잠금 토글
+      div.addEventListener("click", async () => {
 
-                div.classList.add("seat");
+        await db.ref(`${PATH.SEATS}/${id}`).update({
+          locked: !seat.locked
+        });
 
-                const data = seats[id];
+      });
 
-                if (data && data.owner) {
-                    div.innerText = data.owner;
-                }
+      container.appendChild(div);
+    }
+  });
+}
 
-                seatGrid.appendChild(div);
 
-            }
+/* =========================
+   게임 상태 표시
+========================= */
 
-        }
+function listenGame() {
+  db.ref(`${PATH.GAME}`).on("value", (snap) => {
 
-    });
+    const game = snap.val();
+    if (!game) return;
 
+    let status = "";
+
+    if (game.state === GAME_STATE.WAIT) status = "대기 중";
+    if (game.state === GAME_STATE.OPEN) status = "진행 중";
+    if (game.state === GAME_STATE.END) status = "종료";
+
+    document.getElementById("captcha-status").innerText =
+      `상태: ${status} / 단어: ${game.captcha}`;
+  });
+}
+
+
+/* =========================
+   학생 생성 함수 (초기화용)
+========================= */
+
+function generateStudents() {
+
+  const students = {};
+
+  for (let i = 1; i <= 29; i++) {
+
+    students[i] = {
+      password: String(1000 + i),
+      seat: null,
+      status: STUDENT_STATE.OFFLINE
+    };
+  }
+
+  return students;
 }

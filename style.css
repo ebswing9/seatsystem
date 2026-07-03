@@ -1,375 +1,192 @@
+
+/* =========================
+   기본 설정
+========================= */
+
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
 }
 
 body {
-    background: #f4f6f8;
-    color: #333;
+  margin: 0;
+  background: #f4f6f8;
+  color: #222;
 }
-
-/* =========================
-   공통
-========================= */
 
 .view {
-    width: 100%;
-    min-height: 100vh;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-}
-
-.view.active {
-    display: flex;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
 
 .hidden {
-    display: none !important;
+  display: none !important;
 }
+
 
 /* =========================
-   로그인 카드
+   카드 UI
 ========================= */
 
-.loginCard {
-    width: 320px;
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    text-align: center;
+.card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 350px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-.loginCard h1 {
-    font-size: 22px;
-    margin-bottom: 10px;
+.card.wide {
+  width: 900px;
 }
 
-.loginCard p {
-    font-size: 14px;
-    color: #777;
-    margin-bottom: 20px;
-}
-
-.loginCard input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-}
-
-.loginCard button {
-    width: 100%;
-    padding: 10px;
-    border: none;
-    border-radius: 8px;
-    background: #2d7ff9;
-    color: white;
-    cursor: pointer;
-    margin-top: 5px;
-}
-
-.loginCard button.secondary {
-    background: #666;
-}
-/* =========================
-   대기 화면
-========================= */
-
-.waitingCard {
-    background: white;
-    padding: 40px;
-    border-radius: 12px;
-    text-align: center;
-    width: 320px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-}
-
-.spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #ddd;
-    border-top: 4px solid #2d7ff9;
-    border-radius: 50%;
-    margin: 0 auto 20px auto;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.myNumber {
-    margin-top: 20px;
-    font-size: 14px;
-    color: #555;
-}
 
 /* =========================
-   티켓 화면
+   입력 / 버튼
 ========================= */
 
-.topBar {
-    display: flex;
-    justify-content: space-between;
-    padding: 15px;
-    background: white;
-    border-bottom: 1px solid #eee;
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
 }
 
-.classroom {
-    display: flex;
-    justify-content: center;
-    align-items: stretch;
-    padding: 20px;
-    gap: 20px;
+button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 6px;
+  background: #2d6cdf;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
 }
 
-.leftLabel,
-.rightLabel {
-    width: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    color: #666;
+button:hover {
+  background: #1f56c2;
 }
 
-/* 중앙 교실 영역 */
-.centerRoom {
-    flex: 1;
-    background: #fff;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+.error-text {
+  color: red;
+  font-size: 13px;
 }
 
-.blackboard {
-    background: #2b2b2b;
-    color: white;
-    padding: 10px;
-    text-align: center;
-    border-radius: 6px;
-    margin-bottom: 20px;
-}
 
 /* =========================
-   좌석 그리드 (핵심)
+   좌석 그리드
 ========================= */
 
-.seatGrid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 10px;
+.seat-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  margin-top: 20px;
 }
 
-/* 3분단 느낌 - 중간 통로 */
-.seatGrid::before {
-    content: "";
-}
 
-/* 좌석 기본 */
+/* =========================
+   좌석
+========================= */
+
 .seat {
-    height: 50px;
-    background: #e9ecef;
-    border-radius: 6px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    font-size: 12px;
+  background: white;
+  border: 2px solid #ccc;
+  border-radius: 6px;
+  padding: 15px 5px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 13px;
+  transition: 0.2s;
 }
 
-/* 내 자리 */
-.seat.mine {
-    background: #4da3ff;
-    color: white;
+.seat:hover {
+  transform: scale(1.05);
+  border-color: #2d6cdf;
 }
 
-/* 다른 학생 */
-.seat.occupied {
-    background: #adb5bd;
-    cursor: not-allowed;
+.seat.taken {
+  background: #d9d9d9;
+  cursor: not-allowed;
+  border-color: #999;
 }
 
-/* 사용 안함 */
 .seat.locked {
-    background: #444;
-    color: #999;
-    cursor: not-allowed;
+  background: #333;
+  color: white;
+  cursor: not-allowed;
 }
+
+
 /* =========================
-   인증 모달
+   모달
 ========================= */
 
 .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.modalContent {
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    width: 320px;
-    text-align: center;
+.modal-box {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 300px;
+  text-align: center;
 }
 
-.captchaDisplay {
-    font-size: 18px;
-    font-weight: bold;
-    margin: 15px 0;
-    color: #2d7ff9;
+.captcha-box {
+  font-size: 20px;
+  font-weight: bold;
+  background: #eee;
+  padding: 10px;
+  margin: 10px 0;
 }
 
-.modalContent input {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-}
-
-.modalButtons {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
-}
-
-.modalButtons button {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    border-radius: 8px;
-    background: #2d7ff9;
-    color: white;
-    cursor: pointer;
-}
-
-.modalButtons .secondary {
-    background: #666;
-}
 
 /* =========================
-   결과 화면
+   관리자 패널
 ========================= */
 
-.resultHeader {
-    text-align: center;
-    margin-bottom: 20px;
+.panel {
+  margin-top: 20px;
+  padding: 15px;
+  background: #fafafa;
+  border-radius: 8px;
+  text-align: left;
+  border: 1px solid #ddd;
 }
 
-.resultGrid {
-    grid-template-columns: repeat(6, 1fr);
+.panel h3 {
+  margin-top: 0;
 }
+
+#student-list {
+  font-size: 13px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
 
 /* =========================
-   토스트
+   관리자 좌석
 ========================= */
 
-.toast {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0,0,0,0.8);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 20px;
-    font-size: 14px;
-}
-/* =========================
-   관리자 전용 스타일
-========================= */
-
-.adminHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    background: #2d7ff9;
-    color: white;
-}
-
-.adminCard {
-    background: white;
-    margin: 15px;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-}
-
-/* 버튼 */
-button {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 6px;
-    background: #2d7ff9;
-    color: white;
-    cursor: pointer;
-}
-
-button.secondary {
-    background: #666;
-}
-
-/* 상태 영역 */
-.statusRow {
-    margin: 10px 0;
-    font-size: 14px;
-}
-
-/* 학생 리스트 */
-.studentList {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.studentTable {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-}
-
-.studentTable th,
-.studentTable td {
-    border: 1px solid #ddd;
-    padding: 6px;
-    text-align: center;
-}
-
-/* 좌석 관리자 뷰 */
-.adminGrid {
-    grid-template-columns: repeat(6, 1fr);
-}
-
-/* 접속 상태 색 */
-.online {
-    color: green;
-    font-weight: bold;
-}
-
-.offline {
-    color: red;
-}
-
-/* 작은 보정 */
-.message {
-    margin-top: 10px;
-    font-size: 12px;
-    color: #d33;
+#admin-seat-grid {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
 }
