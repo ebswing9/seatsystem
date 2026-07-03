@@ -82,39 +82,31 @@ button:hover {
    좌석 그리드
 ========================= */
 
-.seat-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 10px;
-  margin-top: 20px;
+/* 1. 분단 사이 여백을 위해 6열 사이에 간격을 줍니다 */
+.seat-grid { 
+    display: grid; 
+    /* 6열을 만드는데, 2열-여백-2열-여백-2열 구조로 만듭니다 */
+    grid-template-columns: repeat(2, 1fr) 20px repeat(2, 1fr) 20px repeat(2, 1fr); 
+    row-gap: 15px; 
+    flex-grow: 1; 
 }
 
-
-/* =========================
-   좌석
-========================= */
-
-.seat {
-  background: white;
-  border: 2px solid #ccc;
-  border-radius: 6px;
-  padding: 15px 5px;
-  text-align: center;
-  cursor: pointer;
-  font-size: 13px;
-  transition: 0.2s;
+/* 2. 좌석 이름(R1C1 등) 숨기기 */
+.seat { 
+    height: 50px; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    background: white; 
+    border: 2px solid #d1d5db; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    font-size: 0px; /* 글자 크기를 0으로 해서 안 보이게 함 */
+    transition: all 0.2s; 
 }
 
-.seat:hover {
-  transform: scale(1.05);
-  border-color: #2d6cdf;
-}
-
-.seat.taken {
-  background: #d9d9d9;
-  cursor: not-allowed;
-  border-color: #999;
-}
+/* 좌석에 학생 이름/번호가 들어있을 때만 글자 다시 보이기 */
+.seat.taken { font-size: 0.9rem; }
 
 .seat.locked {
   background: #333;
