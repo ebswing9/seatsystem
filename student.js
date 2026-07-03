@@ -158,9 +158,16 @@ function showResult(final = false) {
    좌석 클릭 처리
 ========================= */
 function openModal(seatId) {
+    // 1. 이미 자리를 잡았는지 체크
+    if (myData && myData.seat) {
+        alert("이미 좌석을 선택하셨습니다.");
+        return;
+    }
+    
     selectedSeat = seatId;
     document.getElementById("modal").classList.remove("hidden");
     document.getElementById("captcha-input").value = "";
+    
     db.ref(`${PATH.GAME}/captcha`).once("value", (snap) => {
         document.getElementById("captcha-text").innerText = snap.val() || "확인";
     });
@@ -172,24 +179,41 @@ document.getElementById("btn-cancel").addEventListener("click", () => {
 });
 
 document.getElementById("btn-confirm").addEventListener("click", async () => {
+    // 1. 이미 자리를 잡았는지 다시 한번 체크 (중복 선택 방지)
+    const currentData = (await db.ref(`${PATH.STUDENTS}/${myId}`).once("value")).val();
+    if (currentData && currentData.seat) {
+        alert("이미 좌석을 선택하셨습니다.");
+        document.getElementById("modal").classList.add("hidden");
+        return;
+    }
+
     const input = document.getElementById("captcha-input").value;
     const snap = await db.ref(`${PATH.GAME}/captcha`).once("value");
+    
     if (input !== snap.val()) {
         alert("인증 단어가 틀렸습니다.");
         return;
     }
+
     const seatRef = db.ref(`${PATH.SEATS}/${selectedSeat}`);
     const seatSnap = await seatRef.once("value");
+    
+    // 2. 다른 학생이 찰나에 그 자리를 채갔는지 체크
     if (seatSnap.val().owner) {
         alert("이미 선택된 자리입니다.");
+        document.getElementById("modal").classList.add("hidden");
         return;
     }
+
+    // 3. 이제 확정
     await seatRef.update({ owner: myId });
-    await db.ref(`${PATH.STUDENTS}/${myId}`).update({ seat: selectedSeat, status: STUDENT_STATE.DONE });
+    await db.ref(`${PATH.STUDENTS}/${myId}`).update({ 
+        seat: selectedSeat, 
+        status: STUDENT_STATE.DONE 
+    });
+    
     document.getElementById("modal").classList.add("hidden");
 });
-
-
 window.addEventListener("load", async () => {
     const savedId = localStorage.getItem("myId");
     if (savedId) {
