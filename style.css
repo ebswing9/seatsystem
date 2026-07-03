@@ -1,11 +1,9 @@
-
 /* =========================
    기본 설정
 ========================= */
-
 * {
   box-sizing: border-box;
-  font-family: Arial, sans-serif;
+  font-family: 'Malgun Gothic', Arial, sans-serif; /* 한국어 폰트 가독성 보정 */
 }
 
 body {
@@ -19,46 +17,45 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  padding: 20px;
 }
 
 .hidden {
   display: none !important;
 }
 
-
 /* =========================
-   카드 UI
+   카드 UI (반응형 지원 및 크기 조절)
 ========================= */
-
 .card {
   background: white;
   padding: 25px;
   border-radius: 12px;
-  width: 350px;
+  width: 100%;
+  max-width: 400px;
   text-align: center;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .card.wide {
-  width: 900px;
+  max-width: 1000px; /* 좌석판과 교실 구조가 넉넉히 들어가도록 확장 */
 }
-
 
 /* =========================
    입력 / 버튼
 ========================= */
-
 input {
   width: 100%;
-  padding: 10px;
+  padding: 11px;
   margin: 8px 0;
   border: 1px solid #ccc;
   border-radius: 6px;
+  font-size: 14px;
 }
 
 button {
   width: 100%;
-  padding: 10px;
+  padding: 11px;
   margin-top: 10px;
   border: none;
   border-radius: 6px;
@@ -66,6 +63,8 @@ button {
   color: white;
   cursor: pointer;
   font-weight: bold;
+  font-size: 14px;
+  transition: background 0.2s;
 }
 
 button:hover {
@@ -73,120 +72,207 @@ button:hover {
 }
 
 .error-text {
-  color: red;
+  color: #d9534f;
   font-size: 13px;
+  margin-top: 8px;
 }
 
-
 /* =========================
-   좌석 그리드
+   ★ 신규 추가: 교실 구조 (칠판 / 창문 / 복도)
 ========================= */
-
-.seat-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 10px;
-  margin-top: 20px;
-}
-
-
-/* =========================
-   좌석
-========================= */
-
-.seat {
-  background: white;
-  border: 2px solid #ccc;
+.blackboard {
+  background: #2b5138; /* 칠판 느낌의 딥그린 색상 */
+  color: #ffffff;
+  padding: 12px;
   border-radius: 6px;
-  padding: 15px 5px;
+  font-weight: bold;
+  font-size: 16px;
+  letter-spacing: 2px;
+  margin: 15px auto 25px auto;
+  max-width: 600px;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+/* 창문 - 좌석 - 복도를 가로로 3분할 배치하는 틀 */
+.classroom-layout {
+  display: flex;
+  align-items: stretch;
+  gap: 15px;
+  margin: 20px 0;
+  width: 100%;
+}
+
+/* 왼쪽 창문 레이블 */
+.window-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e3f2fd;
+  color: #1e88e5;
+  border: 1px dashed #90caf9;
+  border-radius: 6px;
+  width: 50px;
+  font-size: 14px;
+  font-weight: bold;
+  writing-mode: vertical-lr; /* 글자를 세로로 이쁘게 내려쓰기 */
+  text-orientation: upright;
+  padding: 10px 0;
+}
+
+/* 오른쪽 복도 레이블 */
+.corridor-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #efebe9;
+  color: #6d4c41;
+  border: 1px dashed #bcaaa4;
+  border-radius: 6px;
+  width: 50px;
+  font-size: 14px;
+  font-weight: bold;
+  writing-mode: vertical-lr;
+  text-orientation: upright;
+  padding: 10px 0;
+}
+
+/* =========================
+   좌석 그리드 (중앙 공간 차지)
+========================= */
+.seat-grid {
+  flex: 1; /* 창문과 복도 사이의 공간을 꽉 채움 */
+  display: grid;
+  grid-template-columns: repeat(6, 1fr); /* 한 줄에 6명씩 배치 */
+  gap: 12px;
+}
+
+/* =========================
+   좌석 개별 스타일 (요구사항 색상 반영)
+========================= */
+.seat {
+  background: #ffffff;
+  border: 2px solid #ced4da;
+  border-radius: 8px;
+  padding: 18px 5px;
   text-align: center;
   cursor: pointer;
-  font-size: 13px;
-  transition: 0.2s;
+  font-size: 14px;
+  font-weight: bold;
+  color: #495057;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  white-space: pre-line; /* 자바스크립트의 줄바꿈(\n) 인식 */
+  min-height: 70px;
 }
 
-.seat:hover {
-  transform: scale(1.05);
+/* 빈 좌석 마우스 호버 시 */
+.seat:not(.taken):not(.locked):hover {
+  transform: translateY(-3px);
   border-color: #2d6cdf;
+  box-shadow: 0 4px 8px rgba(45, 108, 223, 0.2);
+  color: #2d6cdf;
 }
 
+/* 1. 남의 자리 -> 회색 (선택 불가능) */
 .seat.taken {
-  background: #d9d9d9;
+  background: #e9ecef;
+  color: #868e96;
   cursor: not-allowed;
-  border-color: #999;
+  border-color: #dee2e6;
 }
 
+/* 2. 내 자리 -> 파란색 (확연히 돋보이게 처리) */
+.seat.my-seat {
+  background: #e7f1ff;
+  color: #0d6efd;
+  border-color: #0d6efd;
+  box-shadow: 0 0 8px rgba(13, 110, 253, 0.3);
+}
+
+/* 3. 잠금 좌석 -> 검은색 어둡게 */
 .seat.locked {
-  background: #333;
-  color: white;
+  background: #343a40;
+  color: #f8f9fa;
+  border-color: #212529;
   cursor: not-allowed;
 }
-
 
 /* =========================
-   모달
+   인증 모달 UI
 ========================= */
-
 .modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.55);
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 999;
 }
 
 .modal-box {
   background: white;
-  padding: 20px;
-  border-radius: 10px;
-  width: 300px;
+  padding: 25px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 320px;
   text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
 
 .captcha-box {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
-  background: #eee;
-  padding: 10px;
-  margin: 10px 0;
+  background: #e9ecef;
+  color: #495057;
+  padding: 12px;
+  margin: 15px 0;
+  border-radius: 6px;
+  letter-spacing: 1px;
 }
 
-
 /* =========================
-   관리자 패널
+   관리자 패널 내부 레이아웃
 ========================= */
-
 .panel {
-  margin-top: 20px;
-  padding: 15px;
-  background: #fafafa;
-  border-radius: 8px;
+  margin-top: 25px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 10px;
   text-align: left;
-  border: 1px solid #ddd;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
 }
 
 .panel h3 {
   margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+  border-left: 4px solid #2d6cdf;
+  padding-left: 10px;
+  font-size: 16px;
 }
 
 #student-list {
-  font-size: 13px;
-  max-height: 150px;
+  font-size: 14px;
+  max-height: 200px;
   overflow-y: auto;
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #eee;
 }
 
-
-/* =========================
-   관리자 좌석
-========================= */
-
+/* 관리자화면 좌석 그리드도 동일하게 상속 */
 #admin-seat-grid {
-  margin-top: 10px;
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 8px;
+  gap: 12px;
 }
