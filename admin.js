@@ -1,4 +1,4 @@
-console.log("ADMIN JS LOADED");
+document.addEventListener("DOMContentLoaded", () => {
 
 /* =========================
    상태
@@ -273,4 +273,4 @@ function listenSeats() {
     });
 
 }
-console.log("ADMIN JS END");
+}
