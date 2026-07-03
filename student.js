@@ -45,7 +45,10 @@ document.getElementById("btn-login").addEventListener("click", async () => {
     myData = data;
     localStorage.setItem("myId", myId);
 
-    await db.ref(`${PATH.STUDENTS}/${id}`).update({ status: STUDENT_STATE.ONLINE });
+    await db.ref(`${PATH.STUDENTS}/${id}`).update({ 
+    status: STUDENT_STATE.ONLINE,
+    lastSeen: firebase.database.ServerValue.TIMESTAMP 
+});
     
     // 리스너 시작
     initListeners();
@@ -124,34 +127,31 @@ function showResult(final = false) {
     showView("result-view");
     const box = document.getElementById("final-seat");
     
-    // 최종 결과 모드일 때
     if (final) {
-        document.querySelector("#result-view h2").innerText = "🎉 최종 자리 배치 결과";
+        document.querySelector("#result-view h2").innerText = "🎉 최종 결과";
         
-        // 전체 좌석을 불러와서 표 형태로 표시
+        // 관리자가 보는 것과 동일하게 데이터 가져오기
         db.ref(`${PATH.SEATS}`).once("value", (snap) => {
             const seats = snap.val() || {};
-            let html = `<div style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-top:10px;">`;
+            // CSS에서 만든 .seat-grid 클래스를 사용하여 똑같은 배치 적용
+            let html = `<div class="seat-grid">`; 
             
-            // 좌석 순서대로(R1C1~R5C5) 출력
             for (const seatId in seats) {
-                const owner = seats[seatId].owner || "-";
-                html += `<div style="border:1px solid #ccc; padding:5px; font-size:11px; text-align:center;">
-                          ${seatId}<br><b>${owner}</b>
+                const owner = seats[seatId].owner || "";
+                // 좌석 이름(seatId)은 안 보이고, 주인(owner)만 보이게 함
+                html += `<div class="seat ${owner ? 'taken' : ''}">
+                          ${owner}
                         </div>`;
             }
             html += `</div>`;
             box.innerHTML = html;
         });
-    } 
-    // 그냥 결과창 모드일 때 (내 자리 확인)
-    else {
+    } else {
+        // 기존 결과 화면
         document.querySelector("#result-view h2").innerText = "자리 배치 결과";
-        if (myData?.seat) {
-            box.innerHTML = `<h3>내 번호: ${myId}</h3><p>선택 좌석: ${myData.seat}</p>`;
-        } else {
-            box.innerHTML = `<p>아직 좌석을 선택하지 않았습니다.</p>`;
-        }
+        box.innerHTML = myData?.seat 
+            ? `<h3>내 번호: ${myId}</h3><p>선택 좌석: ${myData.seat}</p>` 
+            : `<p>결과를 기다리는 중입니다...</p>`;
     }
 }
 /* =========================

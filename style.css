@@ -83,11 +83,13 @@ button:hover {
 ========================= */
 
 /* 1. 분단 사이 여백을 위해 6열 사이에 간격을 줍니다 */
+/* style.css */
 .seat-grid { 
     display: grid; 
-    /* 6열을 만드는데, 2열-여백-2열-여백-2열 구조로 만듭니다 */
-    grid-template-columns: repeat(2, 1fr) 20px repeat(2, 1fr) 20px repeat(2, 1fr); 
+    /* 2열, 간격, 2열, 간격, 2열 순서로 배치 */
+    grid-template-columns: 1fr 1fr 20px 1fr 1fr 20px 1fr 1fr; 
     row-gap: 15px; 
+    column-gap: 10px;
     flex-grow: 1; 
 }
 
