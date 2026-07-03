@@ -102,3 +102,14 @@ function getInitialGame() {
     captcha: DEFAULT_CAPTCHA
   };
 }
+
+// ==========================================
+// 🌍 브라우저가 무조건 읽을 수 있게 강제로 묶어버리기
+// ==========================================
+window.db = db;
+window.PATH = PATH;
+window.GAME_STATE = GAME_STATE;
+window.STUDENT_STATE = STUDENT_STATE;
+window.DEFAULT_CAPTCHA = DEFAULT_CAPTCHA;
+window.generateSeats = generateSeats;
+window.checkCaptcha = checkCaptcha;
