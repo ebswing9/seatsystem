@@ -1,32 +1,42 @@
 /* =========================
-   관리자 로그인 (에러 추적 및 마스터키 내장 버전)
+   [안전장치] 전역 변수 중복 선언 방지
+   let이나 const 대신 전역 객체(window)를 활용해 충돌을 원천 차단합니다.
 ========================= */
+if (!window.PATH) window.PATH = { STUDENTS: "students", GAME: "game", SEATS: "seats" };
+if (!window.GAME_STATE) window.GAME_STATE = { WAIT: "WAIT", OPEN: "OPEN", END: "END" };
+if (!window.STUDENT_STATE) window.STUDENT_STATE = { ONLINE: "ONLINE", OFFLINE: "OFFLINE", DONE: "DONE" };
+if (!window.DEFAULT_CAPTCHA) window.DEFAULT_CAPTCHA = "자리확정";
 
+/* =========================
+   관리자 로그인
+========================= */
 document.getElementById("btn-admin-login").addEventListener("click", async () => {
   const pw = document.getElementById("admin-pw").value.trim();
   const error = document.getElementById("admin-login-error");
   error.innerText = "";
 
-  // 1. 치트키 마스터키 제공: 파이어베이스 연결이 터져도 내가 입력한 비번이 1234면 무조건 통과!
-  if (pw === "1234" || pw === 1234) {
-    alert("마스터키로 로그인 성공! 패널로 진입합니다.");
+  // [치트키] 파이어베이스 에러 유무와 상관없이 '1234' 입력 시 무조건 통과
+  if (pw === "4035" || pw === 4035) {
     document.getElementById("admin-login-view").classList.add("hidden");
     document.getElementById("admin-view").classList.remove("hidden");
     
-    // 혹시 아래 함수 실행하다 에러나서 화면 멈추는 걸 방지하기 위한 예외 처리
-    try { initAdmin(); } catch(e) { console.error("초기화 에러:", e); }
+    try { 
+      initAdmin(); 
+    } catch(e) { 
+      alert("로그인은 되었으나 내부 데이터를 불러오는데 실패했습니다. 파이어베이스 연결을 확인하세요.");
+      console.error(e); 
+    }
     return;
   }
 
-  // 2. 파이어베이스 연동 로그인 시도 (여기서 에러가 나면 팝업창으로 에러를 띄워줍니다)
+  // 일반 파이어베이스 로그인 로직
   try {
-    // 혹시 변수명이 db가 아닐 경우를 위한 체크
     if (typeof db === "undefined") {
-      alert("에러 발생: firebase.js에 'db'라는 이름의 변수가 선언되어 있지 않습니다! 다른 이름을 쓰시는지 확인이 필요해요.");
+      error.innerText = "데이터베이스(db) 연결에 실패했습니다. 1234를 입력해 보세요.";
       return;
     }
 
-    const snap = await db.ref(`${PATH.GAME}/adminPassword`).once("value");
+    const snap = await db.ref(`${window.PATH.GAME}/adminPassword`).once("value");
     const realPw = snap.val();
 
     if (!realPw) {
@@ -41,13 +51,10 @@ document.getElementById("btn-admin-login").addEventListener("click", async () =>
 
     document.getElementById("admin-login-view").classList.add("hidden");
     document.getElementById("admin-view").classList.remove("hidden");
-
     initAdmin();
 
   } catch (err) {
-    // 💥 먹통이 되던 원인을 화면에 팝업창으로 강제로 찍어줍니다.
-    alert("파이어베이스 에러 발생! 원인: " + err.message);
-    console.error(err);
+    error.innerText = "에러: " + err.message;
   }
 });
 
@@ -55,97 +62,83 @@ document.getElementById("btn-admin-login").addEventListener("click", async () =>
    관리자 패널 활성화
 ========================= */
 function initAdmin() {
-  listenStudents();
-  listenSeats();
-  listenGame();
-  setupStudentManager(); // 👈 학생 계정 관리 기능 연결
+  if (typeof db !== "undefined") {
+    listenStudents();
+    listenSeats();
+    listenGame();
+  }
+  setupStudentManager();
 }
 
 /* =========================
-   ★ 학생 계정 관리 및 1~29 자동 생성 (핵심 추가)
+   학생 계정 관리 및 1~29 자동 생성
 ========================= */
 function setupStudentManager() {
   const btnGenerate = document.getElementById("btn-generate-students");
+  if (!btnGenerate) return;
   
   btnGenerate.addEventListener("click", async () => {
     const defaultPwInput = document.getElementById("default-student-pw").value.trim();
-    
     if (!defaultPwInput) {
-      alert("학생들에게 부여할 공통 초기 비밀번호를 입력해 주세요! (예: 0000)");
+      alert("학생용 초기 비밀번호를 입력하세요.");
       return;
     }
 
-    const ok = confirm(`정말 모든 학생(1~29번)의 비밀번호를 '${defaultPwInput}'(으)로 세팅하여 자동 생성하시겠습니까?\n(기존 데이터는 덮어씌워집니다)`);
+    const ok = confirm("1~29번 학생 계정을 자동 생성하시겠습니까?");
     if (!ok) return;
 
     const studentsData = {};
     for (let i = 1; i <= 29; i++) {
       studentsData[i] = {
-        password: String(defaultPwInput), // 문자열로 통일하여 저장
+        password: String(defaultPwInput),
         seat: null,
-        status: STUDENT_STATE.OFFLINE
+        status: window.STUDENT_STATE.OFFLINE
       };
     }
 
     try {
-      await db.ref(`${PATH.STUDENTS}`).set(studentsData);
-      alert("1번부터 29번까지 학생 계정이 일괄 생성 및 초기화되었습니다!");
+      await db.ref(`${window.PATH.STUDENTS}`).set(studentsData);
+      alert("학생 계정이 일괄 생성되었습니다!");
     } catch (error) {
-      console.error(error);
-      alert("생성 중 오류가 발생했습니다. 파이어베이스 규칙을 확인하세요.");
+      alert("생성 실패: " + error.message);
     }
   });
 }
 
 /* =========================
-   게임 상태 제어 (티켓팅 타이밍 제어)
+   게임 상태 제어
 ========================= */
 document.getElementById("btn-start").addEventListener("click", async () => {
-  const snap = await db.ref(`${PATH.GAME}/captcha`).once("value");
-
-  if (!snap.val()) {
-    alert("인증 단어를 먼저 설정하세요.");
-    return;
-  }
-
-  await db.ref(`${PATH.GAME}`).update({
-    state: GAME_STATE.OPEN
-  });
-
-  alert("티켓팅이 실시간 시작되었습니다!");
+  try {
+    await db.ref(`${window.PATH.GAME}`).update({ state: window.GAME_STATE.OPEN });
+    alert("티켓팅 시작!");
+  } catch(e) { alert(e.message); }
 });
 
 document.getElementById("btn-end").addEventListener("click", async () => {
-  await db.ref(`${PATH.GAME}`).update({
-    state: GAME_STATE.END
-  });
-
-  alert("티켓팅이 종료되어 최종 결과 화면으로 락(Lock)되었습니다!");
+  try {
+    await db.ref(`${window.PATH.GAME}`).update({ state: window.GAME_STATE.END });
+    alert("티켓팅 종료!");
+  } catch(e) { alert(e.message); }
 });
 
 document.getElementById("btn-reset").addEventListener("click", async () => {
-  const ok = confirm("정말 모든 좌석판 배치를 초기화하시겠습니까? (학생 계정 데이터는 유지됩니다)");
+  const ok = confirm("전체 초기화하시겠습니까?");
   if (!ok) return;
 
-  // 전체를 완전히 날리는 대신, 좌석 배정 정보 및 대기 상태만 깔끔하게 초기화
-  await db.ref(`${PATH.GAME}`).update({
-    state: GAME_STATE.WAIT,
-    captcha: DEFAULT_CAPTCHA
-  });
-
-  // 모든 학생의 선택한 자리 및 상태 리셋 (계정/비번은 보존)
-  const studentSnap = await db.ref(`${PATH.STUDENTS}`).once("value");
-  const currentStudents = studentSnap.val() || {};
-  for (const id in currentStudents) {
-    currentStudents[id].seat = null;
-    currentStudents[id].status = STUDENT_STATE.OFFLINE;
-  }
-  await db.ref(`${PATH.STUDENTS}`).set(currentStudents);
-
-  // 좌석 원상복구 (1~29개의 기본 좌석 구조 생성)
-  await db.ref(`${PATH.SEATS}`).set(generateInitialSeats());
-
-  alert("좌석 배치 및 상태가 깨끗하게 초기화되었습니다!");
+  try {
+    await db.ref(`${window.PATH.GAME}`).update({ state: window.GAME_STATE.WAIT, captcha: window.DEFAULT_CAPTCHA });
+    
+    const studentSnap = await db.ref(`${window.PATH.STUDENTS}`).once("value");
+    const currentStudents = studentSnap.val() || {};
+    for (const id in currentStudents) {
+      currentStudents[id].seat = null;
+      currentStudents[id].status = window.STUDENT_STATE.OFFLINE;
+    }
+    await db.ref(`${window.PATH.STUDENTS}`).set(currentStudents);
+    await db.ref(`${window.PATH.SEATS}`).set(generateInitialSeats());
+    alert("초기화 완료!");
+  } catch(e) { alert(e.message); }
 });
 
 /* =========================
@@ -153,30 +146,24 @@ document.getElementById("btn-reset").addEventListener("click", async () => {
 ========================= */
 document.getElementById("btn-set-captcha").addEventListener("click", async () => {
   const value = document.getElementById("captcha-admin").value.trim();
+  if (!value) return;
 
-  if (!value) {
-    alert("단어를 입력하세요.");
-    return;
-  }
-
-  await db.ref(`${PATH.GAME}`).update({
-    captcha: value
-  });
-
-  document.getElementById("captcha-status").innerText = `현재 단어: ${value}`;
-  alert(`인증단어가 [ ${value} ] (으)로 변경되었습니다.`);
+  try {
+    await db.ref(`${window.PATH.GAME}`).update({ captcha: value });
+    alert("변경 완료");
+  } catch(e) { alert(e.message); }
 });
 
 /* =========================
    학생 목록 & 패널 리스트 실시간 연동
 ========================= */
 function listenStudents() {
-  db.ref(`${PATH.STUDENTS}`).on("value", (snap) => {
+  db.ref(`${window.PATH.STUDENTS}`).on("value", (snap) => {
     const data = snap.val() || {};
     const listDisplay = document.getElementById("student-list");
     const listManage = document.getElementById("admin-student-list-manage");
 
-    listDisplay.innerHTML = "";
+    if (listDisplay) listDisplay.innerHTML = "";
     if (listManage) listManage.innerHTML = "";
 
     let onlineCount = 0;
@@ -184,44 +171,32 @@ function listenStudents() {
 
     for (const id in data) {
       totalCount++;
-      if (data[id].status === STUDENT_STATE.ONLINE || data[id].status === STUDENT_STATE.DONE) {
-        onlineCount++;
-      }
+      if (data[id].status === window.STUDENT_STATE.ONLINE || data[id].status === window.STUDENT_STATE.DONE) onlineCount++;
 
-      // 1. 실시간 하단 접속 현황 리스트업
       const div = document.createElement("div");
-      div.style.padding = "4px 0";
-      let stateBadge = "🔴 OFFLINE";
-      if (data[id].status === STUDENT_STATE.ONLINE) stateBadge = "🟢 ONLINE";
-      if (data[id].status === STUDENT_STATE.DONE) stateBadge = "🔵 선택완료";
+      div.innerText = `[${id}번] 상태: ${data[id].status || "OFFLINE"} | 좌석: ${data[id].seat || "-"}`;
+      if (listDisplay) listDisplay.appendChild(div);
 
-      div.innerText = `[${id}번] 상태: ${stateBadge} | 선택 좌석: ${data[id].seat || "-"}`;
-      listDisplay.appendChild(div);
-
-      // 2. 상단 학생 비밀번호 관리 리스트업
       if (listManage) {
         const manageDiv = document.createElement("div");
-        manageDiv.style.borderBottom = "1px solid #eee";
-        manageDiv.style.padding = "2px 0";
-        manageDiv.innerText = `번호: ${id}번 | 설정 비밀번호: ${data[id].password}`;
+        manageDiv.innerText = `번호: ${id}번 | 비번: ${data[id].password}`;
         listManage.appendChild(manageDiv);
       }
     }
-
-    document.getElementById("connect-count").innerText = `${onlineCount} / ${totalCount}`;
-    if (totalCount === 0 && listManage) {
-      listManage.innerText = "등록된 학생이 없습니다. 먼저 생성해 주세요.";
+    if (document.getElementById("connect-count")) {
+      document.getElementById("connect-count").innerText = `${onlineCount} / ${totalCount}`;
     }
   });
 }
 
 /* =========================
-   ★ 좌석 실시간 렌더링 & 토글 잠금 (R1C1 제거 완벽 반영)
+   좌석 실시간 렌더링
 ========================= */
 function listenSeats() {
-  db.ref(`${PATH.SEATS}`).on("value", (snap) => {
+  db.ref(`${window.PATH.SEATS}`).on("value", (snap) => {
     const seats = snap.val() || {};
     const container = document.getElementById("admin-seat-grid");
+    if (!container) return;
     container.innerHTML = "";
 
     for (const id in seats) {
@@ -229,67 +204,40 @@ function listenSeats() {
       const div = document.createElement("div");
       div.className = "seat";
 
-      // 스타일 클래스 주입
       if (seat.locked) div.classList.add("locked");
       if (seat.owner) div.classList.add("taken");
 
-      // R1C1 텍스트 흔적 삭제 및 매칭 이름 표시 (임자가 있으면 학생 번호 노출)
-      if (seat.locked) {
-        div.innerText = "🔒";
-      } else if (seat.owner) {
-        div.innerText = `${id}\n(${seat.owner}번)`;
-      } else {
-        div.innerText = id; // 고유 좌석 식별 번호 노출
-      }
+      div.innerText = seat.locked ? "🔒" : (seat.owner ? `${id}\n(${seat.owner}번)` : id);
 
-      // 좌석 클릭 시 선생님 권한으로 실시간 잠금/해제 토글 활성화
       div.addEventListener("click", async () => {
         if (seat.owner) {
-          const cancelOk = confirm(`이미 ${seat.owner}번 학생이 찜한 자리입니다. 강제로 취소/잠금 처리하시겠습니까?`);
-          if (!cancelOk) return;
-          
-          // 학생의 데이터 초기화
-          await db.ref(`${PATH.STUDENTS}/${seat.owner}`).update({ seat: null, status: STUDENT_STATE.ONLINE });
+          if (!confirm("선택을 취소하시겠습니까?")) return;
+          await db.ref(`${window.PATH.STUDENTS}/${seat.owner}`).update({ seat: null, status: window.STUDENT_STATE.ONLINE });
         }
-
-        await db.ref(`${PATH.SEATS}/${id}`).update({
-          locked: !seat.locked,
-          owner: null // 잠금 시 기존 주인 데이터는 초기화
-        });
+        await db.ref(`${window.PATH.SEATS}/${id}`).update({ locked: !seat.locked, owner: null });
       });
-
       container.appendChild(div);
     }
   });
 }
 
 /* =========================
-   게임 상단 실시간 헤더 동기화
+   게임 헤더 동기화
 ========================= */
 function listenGame() {
-  db.ref(`${PATH.GAME}`).on("value", (snap) => {
+  db.ref(`${window.PATH.GAME}`).on("value", (snap) => {
     const game = snap.val();
     if (!game) return;
-
-    let status = "대기 중";
-    if (game.state === GAME_STATE.OPEN) status = "진행 중";
-    if (game.state === GAME_STATE.END) status = "종료됨";
-
-    document.getElementById("captcha-status").innerText = `현재 상태: [ ${status} ] / 설정된 단어: [ ${game.captcha || DEFAULT_CAPTCHA} ]`;
+    let status = game.state === window.GAME_STATE.OPEN ? "진행 중" : (game.state === window.GAME_STATE.END ? "종료됨" : "대기 중");
+    const target = document.getElementById("captcha-status");
+    if (target) target.innerText = `상태: [ ${status} ] / 단어: [ ${game.captcha || window.DEFAULT_CAPTCHA} ]`;
   });
 }
 
-/* =========================
-   기본 데이터셋 헬퍼 함수
-========================= */
 function generateInitialSeats() {
   const seats = {};
-  // 교실 규모에 알맞게 1번 좌석부터 30번(혹은 교실 구조에 맞춰) 세팅 가능하도록 빌드
   for (let i = 1; i <= 30; i++) {
-    seats[`좌석${i}`] = {
-      locked: false,
-      owner: null
-    };
+    seats[`좌석${i}`] = { locked: false, owner: null };
   }
   return seats;
 }
