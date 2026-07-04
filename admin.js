@@ -139,12 +139,23 @@ document.getElementById("btn-end").addEventListener("click", async () => {
 });
 
 document.getElementById("btn-reset").addEventListener("click", async () => {
-    const ok = confirm("전체 초기화하시겠습니까?\n(학생 접속 상태와 좌석 배치가 모두 삭제됩니다)");
+    const ok = confirm("전체 초기화하시겠습니까?\n(좌석 배치와 접속 상태가 모두 삭제됩니다)");
     if (!ok) return;
 
-    // 관리자 비밀번호는 유지한 채로 나머지(게임 상태, 학생, 좌석)만 초기화
+    // 관리자 비밀번호는 유지
     const pwSnap = await db.ref(`${PATH.GAME}/adminPassword`).once("value");
     const currentAdminPw = pwSnap.val() || "1234";
+
+    // 학생 비밀번호도 유지 (CSV로 설정해둔 값이 초기화되지 않도록)
+    const studentsSnap = await db.ref(`${PATH.STUDENTS}`).once("value");
+    const existingStudents = studentsSnap.val() || {};
+
+    const newStudents = generateStudents();
+    for (const id in newStudents) {
+        if (existingStudents[id] && existingStudents[id].password) {
+            newStudents[id].password = existingStudents[id].password;
+        }
+    }
 
     await db.ref("/").set({
         game: {
@@ -152,11 +163,11 @@ document.getElementById("btn-reset").addEventListener("click", async () => {
             captcha: DEFAULT_CAPTCHA,
             adminPassword: currentAdminPw
         },
-        students: generateStudents(),
+        students: newStudents,
         seats: generateSeats()
     });
 
-    alert("초기화 완료! (관리자 비밀번호는 유지됩니다)");
+    alert("초기화 완료! (관리자 비밀번호와 학생 비밀번호는 유지됩니다)");
 });
 
 /* =========================
