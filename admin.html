@@ -34,6 +34,18 @@
       <p id="captcha-status"></p>
     </div>
 
+    <!-- 학생 비밀번호 일괄 관리 -->
+    <div class="panel">
+      <h3>🔑 학생 비밀번호 일괄 관리</h3>
+      <button id="btn-download-csv" class="secondary">현재 비밀번호 CSV 다운로드</button>
+      <input id="csv-upload" type="file" accept=".csv"/>
+      <button id="btn-apply-csv">CSV 적용</button>
+      <p id="csv-status" class="error-text"></p>
+      <p style="font-size:12px; color:#666; text-align:left; margin-top:4px;">
+        형식: 한 줄에 "번호,비밀번호" (예: 1,1234). 다운로드한 파일을 엑셀/메모장으로 수정 후 다시 업로드하세요.
+      </p>
+    </div>
+
     <!-- 게임 제어 -->
     <div class="panel">
       <h3>🎮 게임 제어</h3>
@@ -53,7 +65,7 @@
     <div class="panel">
       <h3>🪑 좌석 현황 (클릭하면 좌석 잠금/해제)</h3>
       <div class="classroom-container">
-        <div class="blackboard">칠 판</div>
+        <div class="blackboard">칠 판 (Screen)</div>
         <div class="main-area">
           <div class="side-area window-side"><span>창</span><span>문</span></div>
           <div id="admin-seat-grid" class="seat-grid"></div>

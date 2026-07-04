@@ -34,6 +34,93 @@ function initAdmin() {
 }
 
 /* =========================
+   학생 비밀번호 CSV 다운로드
+========================= */
+document.getElementById("btn-download-csv").addEventListener("click", async () => {
+    const snap = await db.ref(`${PATH.STUDENTS}`).once("value");
+    const data = snap.val() || {};
+
+    const rows = Object.keys(data)
+        .map(id => parseInt(id, 10))
+        .sort((a, b) => a - b)
+        .map(id => `${id},${data[id].password}`);
+
+    const csvContent = rows.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "student_passwords.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+});
+
+/* =========================
+   학생 비밀번호 CSV 업로드/적용
+   - 좌석, 접속 상태는 그대로 두고 비밀번호만 갱신
+========================= */
+document.getElementById("btn-apply-csv").addEventListener("click", () => {
+    const fileInput = document.getElementById("csv-upload");
+    const status = document.getElementById("csv-status");
+    status.innerText = "";
+
+    const file = fileInput.files[0];
+    if (!file) {
+        status.innerText = "CSV 파일을 선택하세요.";
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const lines = e.target.result
+            .split(/\r?\n/)
+            .map(l => l.trim())
+            .filter(l => l.length > 0);
+
+        const updates = {};
+        const errors = [];
+        let successCount = 0;
+
+        lines.forEach((line, idx) => {
+            const parts = line.split(",").map(p => p.trim());
+            if (parts.length !== 2) {
+                errors.push(`${idx + 1}행 형식 오류`);
+                return;
+            }
+
+            const [idStr, pw] = parts;
+            const id = parseInt(idStr, 10);
+
+            if (isNaN(id) || id < 1 || id > 29) {
+                errors.push(`${idx + 1}행 번호 오류(${idStr})`);
+                return;
+            }
+            if (!pw) {
+                errors.push(`${idx + 1}행 비밀번호 없음`);
+                return;
+            }
+
+            updates[`${PATH.STUDENTS}/${id}/password`] = pw;
+            successCount++;
+        });
+
+        if (Object.keys(updates).length > 0) {
+            await db.ref().update(updates);
+        }
+
+        let message = `✅ ${successCount}명 비밀번호 적용 완료`;
+        if (errors.length > 0) {
+            message += ` / ⚠️ 오류 ${errors.length}건: ${errors.join(", ")}`;
+        }
+        status.innerText = message;
+        fileInput.value = "";
+    };
+
+    reader.readAsText(file);
+});
+
+/* =========================
    게임 상태 제어
 ========================= */
 document.getElementById("btn-start").addEventListener("click", async () => {
