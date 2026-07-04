@@ -8,7 +8,6 @@ const firebaseConfig = {
   appId: "1:70208434015:web:9557a0acdb1c4f2de5d0ea"
 };
 
-
 // Firebase 초기화
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();

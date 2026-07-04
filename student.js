@@ -185,7 +185,7 @@ function showResult(final = false) {
     const waitingText = document.getElementById("result-waiting-text");
 
     if (final) {
-        document.querySelector("#result-view h2").innerText = "🎉 최종 결과";
+        document.querySelector("#result-view h2").innerHTML = '<svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 5h2"/><path d="M5 4v2"/><path d="M11.5 4l-.5 2"/><path d="M18 5h2"/><path d="M19 4v2"/><path d="M15 9l-1 1"/><path d="M18 13l2 -.5"/><path d="M18 19h2"/><path d="M19 18v2"/><path d="M14 16.518l-6.518 -6.518l-4.39 9.58a1 1 0 0 0 1.329 1.329l9.579 -4.39"/></svg>최종 결과';
         waitingText.classList.add("hidden");
 
         db.ref(`${PATH.SEATS}`).once("value", (snap) => {
@@ -200,7 +200,7 @@ function showResult(final = false) {
         document.querySelector("#result-view h2").innerText = "자리 배치 결과";
         waitingText.classList.remove("hidden");
         box.innerHTML = myData?.seat
-            ? `<h3>내 번호: ${myId}</h3><p>선택 좌석 확정!</p>`
+            ? `<h3>내 번호: ${myId}</h3><p>선택 좌석 확정</p>`
             : `<p>결과를 기다리는 중입니다...</p>`;
     }
 }

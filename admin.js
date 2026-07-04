@@ -18,10 +18,35 @@ document.getElementById("btn-admin-login").addEventListener("click", async () =>
         return;
     }
 
+    localStorage.setItem("isAdmin", "true");
+
     document.getElementById("admin-login-view").classList.add("hidden");
     document.getElementById("admin-view").classList.remove("hidden");
 
     initAdmin();
+});
+
+/* =========================
+   관리자 로그아웃
+========================= */
+function adminLogout() {
+    localStorage.removeItem("isAdmin");
+    document.getElementById("admin-view").classList.add("hidden");
+    document.getElementById("admin-login-view").classList.remove("hidden");
+    document.getElementById("admin-pw").value = "";
+}
+
+document.getElementById("btn-admin-logout")?.addEventListener("click", adminLogout);
+
+/* =========================
+   자동 로그인 (새로고침 대응)
+========================= */
+window.addEventListener("load", () => {
+    if (localStorage.getItem("isAdmin") === "true") {
+        document.getElementById("admin-login-view").classList.add("hidden");
+        document.getElementById("admin-view").classList.remove("hidden");
+        initAdmin();
+    }
 });
 
 /* =========================
@@ -130,12 +155,12 @@ document.getElementById("btn-start").addEventListener("click", async () => {
         return;
     }
     await db.ref(`${PATH.GAME}`).update({ state: GAME_STATE.OPEN });
-    alert("티켓팅 시작!");
+    alert("티켓팅 시작");
 });
 
 document.getElementById("btn-end").addEventListener("click", async () => {
     await db.ref(`${PATH.GAME}`).update({ state: GAME_STATE.END });
-    alert("티켓팅 종료!");
+    alert("티켓팅 종료");
 });
 
 document.getElementById("btn-reset").addEventListener("click", async () => {
@@ -167,7 +192,7 @@ document.getElementById("btn-reset").addEventListener("click", async () => {
         seats: generateSeats()
     });
 
-    alert("초기화 완료! (관리자 비밀번호와 학생 비밀번호는 유지됩니다)");
+    alert("초기화 완료 (관리자 비밀번호와 학생 비밀번호는 유지됩니다)");
 });
 
 /* =========================
@@ -198,9 +223,25 @@ function listenStudents() {
             if (status === STUDENT_STATE.ONLINE || status === STUDENT_STATE.DONE) {
                 count++;
             }
-            const div = document.createElement("div");
-            div.innerText = `#${id} - ${status} - ${data[id].seat || "-"}`;
-            list.appendChild(div);
+
+            const row = document.createElement("div");
+            row.className = "student-row";
+
+            const idSpan = document.createElement("span");
+            idSpan.innerText = `#${id}`;
+
+            const statusSpan = document.createElement("span");
+            statusSpan.className = `status-badge status-${status.toLowerCase()}`;
+            statusSpan.innerText = status;
+
+            const seatSpan = document.createElement("span");
+            seatSpan.className = "student-seat";
+            seatSpan.innerText = data[id].seat || "-";
+
+            row.appendChild(idSpan);
+            row.appendChild(statusSpan);
+            row.appendChild(seatSpan);
+            list.appendChild(row);
         }
 
         document.getElementById("connect-count").innerText = `${count} / 29`;

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>학급 자리배치 티켓팅</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
   <!-- Firebase (compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -14,7 +15,7 @@
 <!-- 1. 로그인 화면 -->
 <div id="login-view" class="view">
   <div class="card">
-    <h2>🎟 자리배치 티켓팅</h2>
+    <h2><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"/><path d="M21 12h-13l3 -3"/><path d="M11 15l-3 -3"/></svg>자리배치 티켓팅</h2>
     <input id="student-id" type="number" placeholder="번호 (1~29)" min="1" max="29"/>
     <input id="student-pw" type="password" placeholder="비밀번호"/>
     <button id="btn-login">입장</button>
@@ -25,7 +26,7 @@
 <!-- 2. 대기 화면 -->
 <div id="wait-view" class="view hidden">
   <div class="card">
-    <h2>⏳ 대기 중</h2>
+    <h2><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 7v5l3 3"/></svg>대기 중</h2>
     <p>티켓팅 시작 전까지 기다리세요.</p>
     <p>번호: <span id="wait-id"></span></p>
     <button id="btn-logout-wait" class="secondary">로그아웃</button>
@@ -35,7 +36,7 @@
 <!-- 3. 티켓팅 화면 -->
 <div id="main-view" class="view hidden">
   <div class="card wide">
-    <h2>🪑 좌석 선택</h2>
+    <h2><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-4z"/><path d="M14 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-4z"/><path d="M4 15a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-4z"/><path d="M14 15a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-4z"/></svg>좌석 선택</h2>
     <div id="classroom-layout" class="classroom-container">
       <div class="blackboard">칠 판</div>
       <div class="main-area">
@@ -68,7 +69,7 @@
 <!-- 5. 결과 화면 -->
 <div id="result-view" class="view hidden">
   <div class="card wide">
-    <h2>✅ 선택 완료</h2>
+    <h2><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M9 12l2 2l4 -4"/></svg>선택 완료</h2>
     <p id="result-waiting-text">최종 결과를 기다리세요.</p>
     <div id="final-seat"></div>
     <button id="btn-logout-result" class="secondary">로그아웃</button>
