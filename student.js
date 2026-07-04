@@ -161,9 +161,11 @@ function renderSeatGrid(container, seats, { interactive = false, revealOwner = f
 function showResult(final = false) {
     showView("result-view");
     const box = document.getElementById("final-seat");
+    const waitingText = document.getElementById("result-waiting-text");
 
     if (final) {
         document.querySelector("#result-view h2").innerText = "🎉 최종 결과";
+        waitingText.classList.add("hidden");
 
         db.ref(`${PATH.SEATS}`).once("value", (snap) => {
             const seats = snap.val() || {};
@@ -175,6 +177,7 @@ function showResult(final = false) {
         });
     } else {
         document.querySelector("#result-view h2").innerText = "자리 배치 결과";
+        waitingText.classList.remove("hidden");
         box.innerHTML = myData?.seat
             ? `<h3>내 번호: ${myId}</h3><p>선택 좌석 확정!</p>`
             : `<p>결과를 기다리는 중입니다...</p>`;

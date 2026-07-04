@@ -96,9 +96,12 @@ function listenStudents() {
 
         let count = 0;
         for (const id in data) {
-            count++;
+            const status = data[id].status || "OFFLINE";
+            if (status === STUDENT_STATE.ONLINE || status === STUDENT_STATE.DONE) {
+                count++;
+            }
             const div = document.createElement("div");
-            div.innerText = `#${id} - ${data[id].status || "OFFLINE"} - ${data[id].seat || "-"}`;
+            div.innerText = `#${id} - ${status} - ${data[id].seat || "-"}`;
             list.appendChild(div);
         }
 
