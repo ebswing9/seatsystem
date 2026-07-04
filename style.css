@@ -115,6 +115,8 @@ button.secondary:hover {
 .main-area {
   display: flex;
   gap: 15px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .side-area {
@@ -127,6 +129,7 @@ button.secondary:hover {
   border-radius: 8px;
   font-size: 0.8rem;
   color: #4b5563;
+  flex-shrink: 0;
 }
 
 /* 2열 + 통로 + 2열 + 통로 + 2열 구조 (분단 3개)
@@ -137,6 +140,21 @@ button.secondary:hover {
   row-gap: 15px;
   column-gap: 10px;
   flex-grow: 1;
+  min-width: 480px; /* 화면이 좁아져도 좌석이 이 너비 밑으로는 줄어들지 않음 */
+}
+
+/* 화면이 좁을 때는 사이드 영역/여백을 줄여서 좌석에 공간을 더 줌 */
+@media (max-width: 500px) {
+  .classroom-container {
+    padding: 10px;
+  }
+  .main-area {
+    gap: 8px;
+  }
+  .side-area {
+    width: 24px;
+    font-size: 0.7rem;
+  }
 }
 
 .seat-spacer {
