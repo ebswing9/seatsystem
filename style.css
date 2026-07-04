@@ -115,8 +115,6 @@ button.secondary:hover {
 .main-area {
   display: flex;
   gap: 15px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 .side-area {
@@ -140,20 +138,34 @@ button.secondary:hover {
   row-gap: 15px;
   column-gap: 10px;
   flex-grow: 1;
-  min-width: 480px; /* 화면이 좁아져도 좌석이 이 너비 밑으로는 줄어들지 않음 */
 }
 
-/* 화면이 좁을 때는 사이드 영역/여백을 줄여서 좌석에 공간을 더 줌 */
+/* 좁은 화면: 좌석 공간을 지키기 위해 창문/복도/통로/여백을 먼저 줄임 */
 @media (max-width: 500px) {
+  .card.wide {
+    padding: 12px;
+  }
   .classroom-container {
-    padding: 10px;
+    padding: 8px;
   }
   .main-area {
-    gap: 8px;
+    gap: 4px;
   }
   .side-area {
-    width: 24px;
-    font-size: 0.7rem;
+    width: 10px;
+    padding: 0;
+  }
+  .side-area span {
+    display: none; /* 텍스트는 숨기고 색 막대로만 방향 표시 */
+  }
+  .seat-grid {
+    grid-template-columns: 1fr 1fr 8px 1fr 1fr 8px 1fr 1fr;
+    column-gap: 4px;
+    row-gap: 8px;
+  }
+  .seat {
+    height: 42px;
+    font-size: 0.8rem;
   }
 }
 
