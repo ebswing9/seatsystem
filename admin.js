@@ -192,7 +192,7 @@ document.getElementById("btn-reset").addEventListener("click", async () => {
         seats: generateSeats()
     });
 
-    alert("초기화 완료 (관리자 비밀번호와 학생 비밀번호는 유지됩니다)");
+    alert("초기화 완료  (관리자 비밀번호와 학생 비밀번호는 유지됩니다)");
 });
 
 /* =========================
