@@ -134,10 +134,11 @@ button.secondary:hover {
    실제 통로 여백은 JS가 seat-spacer 칸을 넣어줘야 반영됩니다 */
 .seat-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 30px 1fr 1fr 30px 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 30px minmax(0, 1fr) minmax(0, 1fr) 30px minmax(0, 1fr) minmax(0, 1fr);
   row-gap: 15px;
   column-gap: 10px;
   flex-grow: 1;
+  min-width: 0;
 }
 
 /* 좁은 화면: 좌석 공간을 지키기 위해 창문/복도/통로/여백을 먼저 줄임 */
@@ -159,7 +160,7 @@ button.secondary:hover {
     display: none; /* 텍스트는 숨기고 색 막대로만 방향 표시 */
   }
   .seat-grid {
-    grid-template-columns: 1fr 1fr 8px 1fr 1fr 8px 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 8px minmax(0, 1fr) minmax(0, 1fr) 8px minmax(0, 1fr) minmax(0, 1fr);
     column-gap: 4px;
     row-gap: 8px;
   }
