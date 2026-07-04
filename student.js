@@ -7,6 +7,23 @@ let currentGame = null;
 let selectedSeat = null;
 
 /* =========================
+   실시간 접속 감지 (presence)
+   - 연결이 끊기는 순간(탭 닫힘, 네트워크 끊김 등) Firebase가 자동으로 OFFLINE 처리
+========================= */
+function setupPresence() {
+    const connectedRef = db.ref(".info/connected");
+    connectedRef.on("value", (snap) => {
+        if (snap.val() === true && myId) {
+            const myRef = db.ref(`${PATH.STUDENTS}/${myId}`);
+            // 연결이 끊기면 자동으로 OFFLINE으로 바뀌도록 서버에 예약
+            myRef.onDisconnect().update({ status: STUDENT_STATE.OFFLINE });
+            // 지금은 연결되어 있으니 ONLINE으로 표시
+            myRef.update({ status: STUDENT_STATE.ONLINE });
+        }
+    });
+}
+
+/* =========================
    화면 전환
 ========================= */
 function showView(id) {
@@ -51,6 +68,7 @@ document.getElementById("btn-login").addEventListener("click", async () => {
     });
 
     initListeners();
+    setupPresence();
 });
 
 /* =========================
@@ -81,6 +99,9 @@ function initListeners() {
         if (currentGame.state === GAME_STATE.WAIT) {
             showView("wait-view");
             document.getElementById("wait-id").innerText = myId;
+            // 초기화 등으로 상태가 WAIT으로 바뀌어도, 이 리스너가 실행되고 있다는 것 자체가
+            // 접속 중이라는 뜻이므로 새로고침 없이 ONLINE으로 다시 표시
+            db.ref(`${PATH.STUDENTS}/${myId}`).update({ status: STUDENT_STATE.ONLINE });
         } else if (currentGame.state === GAME_STATE.OPEN) {
             if (myData?.seat) {
                 showResult(false);
@@ -265,6 +286,7 @@ window.addEventListener("load", async () => {
                 status: STUDENT_STATE.ONLINE
             });
             initListeners();
+            setupPresence();
         }
     }
 });
