@@ -8,10 +8,10 @@ const firebaseConfig = {
   appId: "1:70208434015:web:9557a0acdb1c4f2de5d0ea"
 };
 
+
 // Firebase 초기화
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-
 
 // ==========================
 // 🔥 공통 경로
@@ -22,7 +22,6 @@ const PATH = {
   SEATS: "seats"
 };
 
-
 // ==========================
 // 🎮 게임 상태
 // ==========================
@@ -31,7 +30,6 @@ const GAME_STATE = {
   OPEN: "OPEN",
   END: "END"
 };
-
 
 // ==========================
 // 🧑 학생 상태
@@ -42,40 +40,28 @@ const STUDENT_STATE = {
   DONE: "DONE"
 };
 
-
 // ==========================
 // 🔐 인증 단어 기본값
 // ==========================
 const DEFAULT_CAPTCHA = "자리확정";
 
-
 // ==========================
-// 🪑 좌석 생성 함수
+// 🪑 좌석 생성 함수 (5행 6열, 마지막 칸 제외 → 29석)
 // ==========================
 function generateSeats() {
   const seats = {};
-  let count = 1;
-
   for (let r = 1; r <= 5; r++) {
     for (let c = 1; c <= 6; c++) {
-
-      // 마지막 칸 제외 (29석)
-      if (r === 5 && c === 6) continue;
-
+      if (r === 5 && c === 6) continue; // 마지막 칸 제외
       const id = `R${r}C${c}`;
-
       seats[id] = {
         owner: null,
         locked: false
       };
-
-      count++;
     }
   }
-
   return seats;
 }
-
 
 // ==========================
 // 🔐 인증 단어 검증
@@ -84,14 +70,12 @@ function checkCaptcha(input, real) {
   return input.trim() === real;
 }
 
-
 // ==========================
 // ⏱ sleep (UI용)
 // ==========================
 function sleep(ms) {
   return new Promise(res => setTimeout(res, ms));
 }
-
 
 // ==========================
 // 🧠 상태 기본 초기화 구조

@@ -4,37 +4,26 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>관리자 - 자리배치</title>
-
   <link rel="stylesheet" href="style.css" />
-
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
-
 <body>
 
-<!-- =========================
-  1. 관리자 로그인
-========================= -->
+<!-- 1. 관리자 로그인 -->
 <div id="admin-login-view" class="view">
   <div class="card">
     <h2>👨‍🏫 관리자 로그인</h2>
-
     <input id="admin-pw" type="password" placeholder="관리자 비밀번호"/>
-
     <button id="btn-admin-login">로그인</button>
-
     <p id="admin-login-error" class="error-text"></p>
   </div>
 </div>
 
-<!-- =========================
-  2. 관리자 패널
-========================= -->
+<!-- 2. 관리자 패널 -->
 <div id="admin-view" class="view hidden">
   <div class="card wide">
-
     <h2>📊 관리자 패널</h2>
 
     <!-- 인증 단어 -->
@@ -48,10 +37,9 @@
     <!-- 게임 제어 -->
     <div class="panel">
       <h3>🎮 게임 제어</h3>
-
       <button id="btn-start">▶ 시작</button>
       <button id="btn-end">⏹ 종료</button>
-      <button id="btn-reset">🔄 초기화</button>
+      <button id="btn-reset" class="secondary">🔄 초기화</button>
     </div>
 
     <!-- 접속 현황 -->
@@ -62,26 +50,22 @@
     </div>
 
     <!-- 좌석 현황 -->
- <!-- admin.html의 좌석 현황 부분 -->
-<div class="panel">
-  <h3>🪑 좌석 현황</h3>
-  
-  <!-- 여기가 학생 페이지와 동일한 칠판/창문/분단 구조 -->
-  <div class="classroom-container">
-      <div class="blackboard">칠 판 (Screen)</div>
-      <div class="main-area">
+    <div class="panel">
+      <h3>🪑 좌석 현황 (클릭하면 좌석 잠금/해제)</h3>
+      <div class="classroom-container">
+        <div class="blackboard">칠 판 (Screen)</div>
+        <div class="main-area">
           <div class="side-area window-side"><span>창</span><span>문</span></div>
           <div id="admin-seat-grid" class="seat-grid"></div>
           <div class="side-area door-side"><span>복</span><span>도</span></div>
+        </div>
       </div>
-  </div>
-</div>
+    </div>
 
   </div>
 </div>
 
 <script src="firebase.js"></script>
 <script src="admin.js"></script>
-
 </body>
 </html>

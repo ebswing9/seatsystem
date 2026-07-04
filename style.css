@@ -1,8 +1,6 @@
-
 /* =========================
    기본 설정
 ========================= */
-
 * {
   box-sizing: border-box;
   font-family: Arial, sans-serif;
@@ -19,6 +17,7 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  padding: 20px;
 }
 
 .hidden {
@@ -41,6 +40,7 @@ body {
 
 .card.wide {
   width: 900px;
+  max-width: 100%;
 }
 
 
@@ -72,6 +72,14 @@ button:hover {
   background: #1f56c2;
 }
 
+button.secondary {
+  background: #9ca3af;
+}
+
+button.secondary:hover {
+  background: #6b7280;
+}
+
 .error-text {
   color: red;
   font-size: 13px;
@@ -79,34 +87,95 @@ button:hover {
 
 
 /* =========================
-   좌석 그리드
+   교실 레이아웃 (학생/관리자 공용)
 ========================= */
 
-/* 1. 분단 사이 여백을 위해 6열 사이에 간격을 줍니다 */
-/* style.css */
-.classroom-container { padding: 20px; background: #f9fafb; border-radius: 12px; }
-.blackboard { width: 100%; height: 50px; background: #064e3b; color: white; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; }
-.main-area { display: flex; gap: 10px; }
-.side-area { width: 40px; background: #e5e7eb; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.classroom-container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  background: #f9fafb;
+  border-radius: 12px;
+}
 
-/* 핵심: 2열 + 간격 + 2열 + 간격 + 2열 구조 */
-.seat-grid { 
-    display: grid; 
-    grid-template-columns: 1fr 1fr 30px 1fr 1fr 30px 1fr 1fr; 
-    row-gap: 15px; 
-    column-gap: 10px;
-    flex-grow: 1; 
+.blackboard {
+  width: 100%;
+  height: 60px;
+  background: #064e3b;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 30px;
+  border-radius: 4px;
 }
-.seat { 
-    height: 50px; display: flex; justify-content: center; align-items: center; 
-    background: white; border: 2px solid #d1d5db; border-radius: 8px; cursor: pointer;
+
+.main-area {
+  display: flex;
+  gap: 15px;
 }
-.seat.taken { background-color: #d1d5db; }
+
+.side-area {
+  width: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: #4b5563;
+}
+
+/* 2열 + 통로 + 2열 + 통로 + 2열 구조 (분단 3개)
+   실제 통로 여백은 JS가 seat-spacer 칸을 넣어줘야 반영됩니다 */
+.seat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 30px 1fr 1fr 30px 1fr 1fr;
+  row-gap: 15px;
+  column-gap: 10px;
+  flex-grow: 1;
+}
+
+.seat-spacer {
+  /* 분단 사이 통로용 빈 칸 - 시각적 여백만 담당 */
+}
+
+.seat {
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: white;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.seat.taken {
+  background-color: #d1d5db;
+}
 
 .seat.locked {
   background: #333;
   color: white;
   cursor: not-allowed;
+}
+
+.seat.other-taken {
+  background-color: #d1d5db;
+  color: #6b7280;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.seat.my-seat {
+  background-color: #10b981;
+  color: white;
 }
 
 
@@ -165,37 +234,3 @@ button:hover {
   max-height: 150px;
   overflow-y: auto;
 }
-
-
-/* =========================
-   관리자 좌석
-========================= */
-
-#admin-seat-grid {
-  margin-top: 10px;
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 8px;
-}
-
-/* style.css 파일 맨 아래 추가 */
-.seat.other-taken {
-    background-color: #d1d5db !important; /* 회색 */
-    color: #6b7280 !important;
-    cursor: not-allowed;
-    pointer-events: none; /* 클릭 차단 */
-}
-.seat.my-seat {
-    background-color: #10b981 !important; /* 녹색 */
-    color: white !important;
-}
-
-
-/* style.css 파일 맨 아래에 추가 */
-
-.classroom-container { padding: 20px; max-width: 800px; margin: 0 auto; background: #f9fafb; border-radius: 12px; }
-.blackboard { width: 100%; height: 60px; background: #064e3b; color: white; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; margin-bottom: 30px; border-radius: 4px; }
-.main-area { display: flex; gap: 15px; }
-.seat-grid { display: grid; grid-template-columns: repeat(6, 1fr); column-gap: 10px; row-gap: 15px; flex-grow: 1; }
-.side-area { width: 40px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #e5e7eb; border-radius: 8px; font-size: 0.8rem; color: #4b5563; }
-.seat { height: 50px; display: flex; justify-content: center; align-items: center; background: white; border: 2px solid #d1d5db; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
